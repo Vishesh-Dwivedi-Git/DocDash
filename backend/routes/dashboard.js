@@ -15,8 +15,10 @@ router.post('/', protect, async (req, res) => {
 
 // Get User Dashboards
 router.get('/', protect, async (req, res) => {
+ 
   const dashboards = await Dashboard.find({ user: req.user._id }).populate('files');
   res.status(200).json(dashboards);
 });
 
 module.exports = router;
+
