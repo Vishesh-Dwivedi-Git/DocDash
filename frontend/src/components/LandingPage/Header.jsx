@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-scroll';
-import Button from './design/Button';
-import '../index.css';
+import Button from '../design/Button';
+import '../../index.css';
 
 const navigation = [
   { name: 'Home', href: 'Home' },
@@ -13,7 +13,7 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-black bg-opacity-60 backdrop-blur-lg fixed w-full z-10">
+    <nav className="bg-black bg-opacity-60 backdrop-blur-lg fixed w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20"> {/* Increased height */}
           {/* Left Section: Product Name */}
@@ -41,7 +41,7 @@ export default function Header() {
 
           {/* Right Section: Sign In (aligns with nav items) */}
           <div className="hidden md:flex items-center"> {/* Added flex and items-center */}
-            <Button href="#login" className="font-code font-bold text-lg">
+            <Button href="/login" className="font-code font-bold text-lg">
               Sign In
             </Button>
           </div>
@@ -92,7 +92,7 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
-            <Button href="#login" className="font-code font-semibold text-lg">
+            <Button href="/login" className="font-code font-semibold text-lg">
               Sign In
             </Button>
           </div>

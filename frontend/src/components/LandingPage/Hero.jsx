@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-scroll';
-import Button from './design/Button';
-import { GridBackgroundDemo } from './design/GridBackgroundDemo';
+import Button from '../design/Button';
+import { GridBackgroundDemo } from '../design/GridBackgroundDemo';
 
 export default function Hero() {
   return (
@@ -22,7 +22,7 @@ export default function Hero() {
             to="features"
             smooth={true} 
             className='z-0'
-          ><Button className="font-code font-semibold text-lg">> Explore Features</Button>
+          ><Button className="font-code font-semibold text-lg"> Explore Features</Button>
           </Link>
           
         </div>
