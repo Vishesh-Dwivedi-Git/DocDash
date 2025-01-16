@@ -6,7 +6,7 @@ import Features from './components/LandingPage/Features';
 import Pricing from './components/LandingPage/Pricing';
 import Footer from './components/LandingPage/Footer';
 import ButtonGradient from './assets/ButtonGradient';
-import DashbB from './components/Dashboard/Dashb';
+import {SidebarDemo} from './components/Dashboard/Dashb';
 import Sign from './components/SignIn/Sign';
 
 function App() {
@@ -15,7 +15,7 @@ function App() {
       <div className="min-h-screen bg-black text-white">
         <Routes>
         <Route path="/login" element={<Sign/>} />
-          <Route path="/dashboard" element={<DashbB/>} />
+          <Route path="/dashboard" element={<SidebarDemo/>} />
           <Route path="/" element={ 
             <>
         <Header />

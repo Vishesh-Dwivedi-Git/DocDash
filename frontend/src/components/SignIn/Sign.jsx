@@ -1,15 +1,41 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 export default function Sign() {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    // Perform sign-in/sign-up logic here (e.g., API calls)
-    navigate("/dashboard"); // Redirect to dashboard after success
+  
+    const userData = {
+      email,
+      password
+    };
+  
+    try {
+      const endpoint = isSignUp ? "http://localhost:5000/api/users/signup" : "http://localhost:5000/api/users/login";
+      const response = await axios.post(endpoint, userData);
+  
+      if (!isSignUp) {
+        // If sign-in, save the token and navigate to the dashboard
+        localStorage.setItem('token', response.data.token);
+        navigate("/dashboard"); // Redirect to dashboard after successful sign-in
+      } else {
+        // If sign-up, alert the user and do not navigate
+        alert("User created successfully");
+      }
+  
+      // Handle successful response, like saving token or user data
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error during authentication:", error.response ? error.response.data : error.message);
+    }
   };
+  
 
   return (
     <div className="h-screen bg-black text-white flex flex-col justify-center items-center">
@@ -21,21 +47,18 @@ export default function Sign() {
           type="email"
           placeholder="Email"
           className="bg-gray-800 px-4 py-2 rounded-md text-white"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
         <input
           type="password"
           placeholder="Password"
           className="bg-gray-800 px-4 py-2 rounded-md text-white"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {isSignUp && (
-          <input
-            type="text"
-            placeholder="Full Name"
-            className="bg-gray-800 px-4 py-2 rounded-md text-white"
-          />
-        )}
         <button
           type="submit"
           className="bg-purple-500 px-4 py-2 rounded-md hover:bg-purple-600 transition"

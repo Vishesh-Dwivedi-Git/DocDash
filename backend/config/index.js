@@ -9,5 +9,5 @@ module.exports = {
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
   },
-  port: process.env.PORT || 5000,  // Default port
+  port:5000,  // Default port
 };
