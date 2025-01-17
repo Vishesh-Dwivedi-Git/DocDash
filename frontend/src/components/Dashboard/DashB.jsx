@@ -12,6 +12,8 @@ import { Link } from "react-router-dom"; // Import Link from react-router-dom
 import { motion } from "framer-motion";
 import Button from "../design/Button";
 import ExpandableCard from "./ui/ExpandableCard";
+import AestheticForm from "./ui/FormData";
+import UsernameInput from "./ui/Username";
 export function SidebarDemo() {
   const links = [
     {
@@ -113,8 +115,13 @@ export const LogoIcon = () => {
 
 const Dashboard = () => {
   const [isCardActive,setIsCardActive] = useState(false);
-  const handleClick=()=>{
+  const [isActiveUser,setActiveUser] = useState(false);
+  const handleClick1=()=>{
     setIsCardActive(true);
+  }
+
+  const handleClick2=()=>{  
+     setActiveUser(true);
   }
 
   return (
@@ -122,7 +129,7 @@ const Dashboard = () => {
       <div className="p-2 md:p-10 rounded-tl-2xl dark:border-neutral-700 bg-black dark:bg-neutral-900 flex flex-col gap-2 flex-1 w-full h-full">
       <div className="flex justify-around items-center">
   {/* Add User Button */}
-  <Button className="font-code font-semibold text-lg" onClick={handleClick}>
+  <Button className="font-code font-semibold text-lg" onClick={handleClick2}>
   <div className="flex flex-row justify-center items-center gap-2">
   <IconUserPlus className="h-5 w-5" />
   Add User
@@ -130,13 +137,13 @@ const Dashboard = () => {
   </Button>
   {/* The ExpandableCard will be shown when `isCardActive` is true */}
 <ExpandableCard
-  isActive={isCardActive}
-  onClose={() => setIsCardActive(false)} // Close the card
-  content={<p>Card Content Goes Here</p>}
+  isActive={isActiveUser}
+  onClose={() => setActiveUser(false)} // Close the card
+  content={<UsernameInput />}
 />
 
   {/* Add Asset Button */}
-  <Button className="font-code font-semibold text-lg" onClick={handleClick}>
+  <Button className="font-code font-semibold text-lg" onClick={handleClick1}>
   <div className="flex flex-row justify-center items-center gap-2">
   <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-file-database"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12.75m-4 0a4 1.75 0 1 0 8 0a4 1.75 0 1 0 -8 0" /><path d="M8 12.5v3.75c0 .966 1.79 1.75 4 1.75s4 -.784 4 -1.75v-3.75" /><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /></svg>
   Add Asset
@@ -145,7 +152,7 @@ const Dashboard = () => {
   <ExpandableCard
   isActive={isCardActive}
   onClose={() => setIsCardActive(false)} // Close the card
-  content={<FormData />}
+  content={<AestheticForm />}
 />
 </div>
 
