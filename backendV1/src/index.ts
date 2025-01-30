@@ -1,20 +1,26 @@
-import express, { request } from "express";
+import express, { Request,Response } from "express";
 import { Content, Link, User } from "./db";
 import bcrypt from "bcrypt"
-import Jwt from "jsonwebtoken";
+import Jwt, { JwtPayload } from "jsonwebtoken";
 import { data } from "./config";
 import { userMiddleware } from "./userMiddleware";
+import { random } from "./utils";
+import mongoose from "mongoose";
 
 
 const app=express();
 app.use(express.json());
 
+mongoose.connect(data.MongoURL as string)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((error) => console.error('Error connecting to MongoDB:', error));
 
-app.("/signup", (req:,res:)=>{
+
+app.post("/api/v1/signup", async (req:Request,res:Response)=>{
     const {username,password}=req.body;
     try {
-        const hashedPassword=bcrypt.hash(password,10);
-       const user=User.create({
+        const hashedPassword=await bcrypt.hash(password,10);
+       await User.create({
         username:username,
         password:hashedPassword
        })
@@ -23,26 +29,29 @@ app.("/signup", (req:,res:)=>{
        })
     }
     catch(e){
-        res.status(401).send({
+        res.status(411).send({
             message:"There was an error"
         })
     }
 });
 
-app.post("./signIn",async (req,res)=>{
-    const {username,password}=req.body;
+app.post("/api/v1/signIn",async (req:Request,res:Response ):Promise<any> =>{
+    const {username ,password} =req.body;
+    console.log("Signin");
     try{
         const user=await User.findOne({
-            username:username
+            username:username,
         });
         if (!user) return res.status(400).json({ message: 'Invalid email or password' });
-        const hashPas=bcrypt.compare(password,user.password);
+        const hashPas=await bcrypt.compare(password,user.password as string);
         if(!hashPas) return res.status(400).json({message:"Invalid email or password"});
         const token=Jwt.sign({
             id:user._id
-        },data.JwtPassword);
+        },data.JwtPassword as string);
+
         res.json({
-            message:"User logined"
+            message:"User logined",
+            token,
         })
     }
     catch(e){
@@ -54,26 +63,34 @@ app.post("./signIn",async (req,res)=>{
 
 })
 
+interface AuthRequest extends Request{
+    userId?:string | JwtPayload
+}
 
-app.post("/content",userMiddleware, async (req,res)=>{
+app.post("/api/v1/content",userMiddleware, async (req:AuthRequest,res:Response):Promise<any>=>{
     const {link , type , title}=req.body;
+    console.log("hi");
     try{
         //create and store the link
         const user= await Content.create({
             link:link,
             type:type,
             title:title,
-            tag:Tag[],
+            tags:[],
             userId:req.userId
         });
+        console.log(user)
         if(!user){
             res.status(401).send({
                 message :"User doesnt exist"
             })
         }
-
+        res.status(200).json({
+            message:"Content Created !!"
+        })
     }
     catch(e){
+        console.log(e);
         res.status(401).send({
             message:"An Error Occurred !"
         })
@@ -81,7 +98,7 @@ app.post("/content",userMiddleware, async (req,res)=>{
 })
 
 
-app.get("/content",userMiddleware,async (req,res)=>{
+app.get("/api/v1/content",userMiddleware,async (req:AuthRequest,res:Response):Promise<any>=>{
     const userId=req.userId;
     const content=await Content.find({
         userId:userId
@@ -91,18 +108,24 @@ app.get("/content",userMiddleware,async (req,res)=>{
     })
 });
 
-app.delete("/content",userMiddleware,async (req,res)=>{
-    await User.deleteMany({
+app.delete("/api/v1/content",userMiddleware,async (req:AuthRequest,res:Response):Promise<any>=>{
+    try {
+        
+        await Content.deleteMany({
         userId:req.userId
     });
-
     res.json({
         message:"Deleted"
     })
+    }
+    catch(e){
+        res.send({e});
+    }
+   
 
 })
 
-app.post("/share",userMiddleware,async (req,res)=>{
+app.post("/api/v1/share",userMiddleware,async (req:AuthRequest,res:Response):Promise<any>=>{
     const share=req.body.share;
     if(share){
         const existingLink=await Link.findOne({
@@ -134,17 +157,19 @@ app.post("/share",userMiddleware,async (req,res)=>{
     }
 })
 
-app.get("/:shareLink",async (req,res)=>{
+app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
     const hash=req.params.shareLink;
+    console.log(hash);
     const link=await Link.findOne({
-        hash
+        hash:hash
     })
     if(!link){
-        res.status(411).json{
-            MessageChannel;"sorry incorrect input"
-        }
+        res.status(411).json({
+             message:"sorry incorrect input"
+        })  
         return ;
     }
+    
     const content=await Content.find({
         userId:link.userId
     })
