@@ -4,7 +4,7 @@ import axios from 'axios';
 
 export default function Sign() {
   const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
@@ -12,12 +12,12 @@ export default function Sign() {
     e.preventDefault();
   
     const userData = {
-      email,
+      username,
       password
     };
   
     try {
-      const endpoint = isSignUp ? "http://localhost:5000/api/users/signup" : "http://localhost:5000/api/users/login";
+      const endpoint = isSignUp ? "http://localhost:3000/api/v1/signup" : "http://localhost:3000/api/v1/signIn";
       const response = await axios.post(endpoint, userData);
   
       if (!isSignUp) {
@@ -44,11 +44,11 @@ export default function Sign() {
       </h1>
       <form onSubmit={handleFormSubmit} className="w-80 flex flex-col space-y-4">
         <input
-          type="email"
+          type="username"
           placeholder="Email"
           className="bg-gray-800 px-4 py-2 rounded-md text-white"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
         />
         <input

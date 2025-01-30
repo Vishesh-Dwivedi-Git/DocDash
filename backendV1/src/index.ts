@@ -6,10 +6,11 @@ import { data } from "./config";
 import { userMiddleware } from "./userMiddleware";
 import { random } from "./utils";
 import mongoose from "mongoose";
-
+import cors from "cors"
 
 const app=express();
 app.use(express.json());
+app.use(cors());
 
 mongoose.connect(data.MongoURL as string)
   .then(() => console.log('Connected to MongoDB'))
