@@ -12,7 +12,7 @@ const tagSchemas=new Schema({
 export const User=mongoose.model("User",userSchemas);
 export const Tag=mongoose.model("Tag", tagSchemas);
 
-const contentTypes=["image","video","article","audio"];
+const contentTypes=["youtube","twitter","instagram","linkedin"];
 
 const contentSchemas= new Schema({
     link:{type:String , required:true},

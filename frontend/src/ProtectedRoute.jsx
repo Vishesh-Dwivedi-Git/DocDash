@@ -1,0 +1,18 @@
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuthStore } from "./store"; // Import Zustand store
+
+const ProtectedRoute = ({ element }) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const location = useLocation(); // Get the current location
+
+  // If the user is not authenticated, redirect them to login and pass the current location
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} />;
+  }
+
+  // If the user is authenticated, render the given element
+  return <>{element}</>;
+};
+
+export default ProtectedRoute;

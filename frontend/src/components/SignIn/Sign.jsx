@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import { useAuthStore } from "../../store";
 
 export default function Sign() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const login=useAuthStore((state)=>state.login);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -23,6 +25,7 @@ export default function Sign() {
       if (!isSignUp) {
         // If sign-in, save the token and navigate to the dashboard
         localStorage.setItem('token', response.data.token);
+        login(response.data.token);
         navigate("/dashboard"); // Redirect to dashboard after successful sign-in
       } else {
         // If sign-up, alert the user and do not navigate

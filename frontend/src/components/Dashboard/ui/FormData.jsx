@@ -3,13 +3,13 @@ import axios from "axios";
 import Store from "../../../store"; // Ensure this path is correct
 
 const AestheticForm = () => {
-  const [loading, setLoading] = useState(false); // State to manage loading
-  const { addItem, resetItems } = Store(); // Destructure the store to add items to the global state
+  const [loading, setLoading] = useState(false);
+  const { addItem, resetItems } = Store(); 
 
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    link: ""
+    link: "",
+    type: "",
+    title: ""
   });
 
   const handleChange = (e) => {
@@ -23,35 +23,39 @@ const AestheticForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate the form fields
-    if (!formData.title || !formData.description || !formData.link) {
+    if (!formData.title || !formData.type || !formData.link) {
       console.error("All fields are required.");
       return;
     }
 
-    setLoading(true); // Set loading to true when starting the request
+    setLoading(true);
 
-    // Prepare the data for submission
     const data = {
-      title: formData.title,
-      description: formData.description,
       link: formData.link,
+      type: formData.type,
+      title: formData.title,
     };
 
     try {
-      const response = await axios.post("http://your-backend-endpoint.com/addItem", data);
+      const token = localStorage.getItem("token"); // Retrieve token
+
+      const response = await axios.post("http://localhost:3000/api/v1/content", data, {
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token || "", // Add token to headers
+        },
+      });
+
       console.log("Response:", response.data);
-      
-      // Only update the global state after a successful submission
-      addItem(formData.title, formData.description, formData.link);
+      addItem(formData.link, formData.type, formData.title);
 
       alert("Form submitted successfully!");
-      setFormData({ title: "", description: "", link: "" }); // Reset the form after successful submission
+      setFormData({ link: "", type: "", title: "" });
     } catch (error) {
       console.error("Error:", error.response ? error.response.data : error.message);
       alert("Failed to submit the form.");
     } finally {
-      setLoading(false); // Set loading to false after the request completes
+      setLoading(false);
     }
   };
 
@@ -76,13 +80,14 @@ const AestheticForm = () => {
         />
       </div>
 
-      {/* Description Input */}
+      {/* Type Input */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-white">Description</label>
-        <textarea
-          id="description"
-          name="description"
-          value={formData.description}
+        <label htmlFor="type" className="block text-sm font-medium text-white">Type</label>
+        <input
+          type="text"
+          id="type"
+          name="type"
+          value={formData.type}
           onChange={handleChange}
           required
           className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
@@ -107,7 +112,7 @@ const AestheticForm = () => {
       <div className="flex justify-between space-x-4">
         <button
           type="reset"
-          onClick={() => setFormData({ title: "", description: "", link: "" })}
+          onClick={() => setFormData({ link: "", type: "", title: "" })}
           className="px-6 py-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-all duration-300"
         >
           Reset

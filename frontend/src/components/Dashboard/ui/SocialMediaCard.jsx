@@ -1,60 +1,58 @@
 import React from "react";
-import { FaYoutube, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
-
-const getEmbedUrl = (url) => {
-  if (!url || typeof url !== "string") return null;
-  
-  try {
-    if (url.includes("youtube.com") || url.includes("youtu.be")) {
-      const videoId = new URL(url).searchParams.get("v") || url.split("/").pop();
-      return `https://www.youtube.com/embed/${videoId}`;
-    }
-    if (url.includes("twitter.com")) return `https://twitframe.com/show?url=${encodeURIComponent(url)}`;
-    if (url.includes("instagram.com")) return `${url}embed/`;
-    if (url.includes("linkedin.com")) return url; // LinkedIn doesn’t have direct embeds
-  } catch (error) {
-    console.error("Invalid URL format", error);
-  }
-  return null;
+import PropTypes from "prop-types";
+import { FaYoutube, FaTwitter, FaInstagram, FaLinkedin, FaTrash, FaShareAlt } from "react-icons/fa";
+import {XEmbed,InstagramEmbed,LinkedInEmbed,YouTubeEmbed} from 'react-social-media-embed'
+const platformIcons = {
+  youtube: <FaYoutube className="text-red-500 text-xl" />, 
+  twitter: <FaTwitter className="text-blue-400 text-xl" />, 
+  instagram: <FaInstagram className="text-pink-500 text-xl" />, 
+  linkedin: <FaLinkedin className="text-blue-600 text-xl" />,
 };
 
-const getPlatformIcon = (url) => {
-  if (!url || typeof url !== "string") return null;
-  
-  if (url.includes("youtube.com") || url.includes("youtu.be")) return <FaYoutube className="text-red-500 text-xl" />;
-  if (url.includes("twitter.com")) return <FaTwitter className="text-blue-400 text-xl" />;
-  if (url.includes("instagram.com")) return <FaInstagram className="text-pink-500 text-xl" />;
-  if (url.includes("linkedin.com")) return <FaLinkedin className="text-blue-600 text-xl" />;
-  return null;
-};
-
-const SocialMediaCard = ({ title, description, link }) => {
-  if (!link) return null; // Prevent rendering if link is missing
-  
-  const embedUrl = getEmbedUrl(link);
-  const platformIcon = getPlatformIcon(link);
-  
+export function SocialMediaCard({ title, link, type }) {
   return (
-    <div className="bg-gray-900 text-white rounded-2xl shadow-lg p-4 max-w-lg mx-auto">
-      <div className="flex items-center gap-3 mb-2">
-        {platformIcon}
-        <h2 className="text-xl font-semibold">{title}</h2>
+    <div className="p-4 bg-white rounded-md border-gray-200 max-w-40 border max-h-56 min-w-72">
+      <div className="flex justify-between">
+        <div className="flex items-center text-md">
+          <div className="text-gray-500 pr-2">{platformIcons[type]}</div>
+          {title}
+        </div>
+        <div className="flex items-center">
+          <div className="pr-2 text-gray-500">
+            <a href={link} target="_blank" rel="noopener noreferrer">
+              <FaShareAlt className="cursor-pointer hover:text-gray-700 transition" />
+            </a>
+          </div>
+          <div className="text-red-400 cursor-pointer hover:text-red-600">
+            <FaTrash title="Delete Post" />
+          </div>
+        </div>
       </div>
-      <p className="text-gray-400 mb-4">{description}</p>
-      {embedUrl ? (
-        <iframe
-          src={embedUrl}
-          className="w-full h-60 rounded-lg"
-          frameBorder="0"
-          allowFullScreen
-        ></iframe>
-      ) : (
-        <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">
-          View Post
-        </a>
-      )}
+
+      <div className="pt-4">
+      {type==="youtube" && 
+        <YouTubeEmbed url={link} width="100%" height="100%"/>
+      }
+        {type==="instagram" && 
+        <InstagramEmbed url={link} width="100%" height={150}/>
+      }
+      {
+        type=="linkedin" && 
+        <LinkedInEmbed url={link} width="100%" height={150}/>
+      }
+        {type==="twitter" && 
+        <XEmbed url={link} width="100%" height={150}/>
+      }
+      </div>
     </div>
   );
+}
+
+// ✅ Define PropTypes for type checking
+SocialMediaCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  link: PropTypes.string.isRequired,
+  type: PropTypes.oneOf(["twitter", "youtube", "instagram", "linkedin"]).isRequired,
 };
 
 export default SocialMediaCard;

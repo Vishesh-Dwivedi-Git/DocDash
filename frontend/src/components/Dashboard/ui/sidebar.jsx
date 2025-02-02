@@ -1,141 +1,136 @@
 "use client";
 import { cn } from "../../../lib/utils";
-import React, { useState, createContext, useContext } from "react";
+import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { IconMenu2, IconX } from "@tabler/icons-react";
-import { Link } from "react-router-dom"; // Import from react-router-dom
+import { IconChevronRight, IconChevronLeft } from "@tabler/icons-react";
+import { Link } from "react-router-dom";
+import { useSidebarStore } from "../../../store"; // Import Zustand store
+import Logout from "../../SignIn/Logout";
 
-const SidebarContext = createContext(undefined);
-
-export const useSidebar = () => {
-  const context = useContext(SidebarContext);
-  if (!context) {
-    throw new Error("useSidebar must be used within a SidebarProvider");
-  }
-  return context;
-};
-
-export const SidebarProvider = ({
-  children,
-  open: openProp,
-  setOpen: setOpenProp,
-  animate = true,
-}) => {
-  const [openState, setOpenState] = useState(false);
-
-  const open = openProp !== undefined ? openProp : openState;
-  const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
-
-  return (
-    <SidebarContext.Provider value={{ open, setOpen, animate: animate }}>
-      {children}
-    </SidebarContext.Provider>
-  );
-};
-
-export const Sidebar = ({ children, open, setOpen, animate }) => {
-  return (
-    <SidebarProvider open={open} setOpen={setOpen} animate={animate}>
-      {children}
-    </SidebarProvider>
-  );
-};
-
-export const SidebarBody = (props) => {
+const handleLogout=()=>{
+  Logout();
+}
+export const Sidebar = ({ children }) => {
   return (
     <>
-      <DesktopSidebar {...props} />
-      <MobileSidebar {...props} />
+      <DesktopSidebar>{children}</DesktopSidebar>
+      <MobileSidebar>{children}</MobileSidebar>
     </>
   );
 };
 
 export const DesktopSidebar = ({ className, children, ...props }) => {
-  const { open, setOpen, animate } = useSidebar();
+  const { open, toggleOpen } = useSidebarStore(); // Zustand for sidebar state
+
   return (
     <motion.div
       className={cn(
-        "h-full px-4 py-4 hidden md:flex md:flex-col bg-black dark:bg-neutral-800 w-[300px] flex-shrink-0",
-        className
+        "h-full px-4 py-4 hidden md:flex md:flex-col bg-black dark:bg-neutral-800 relative text-white",
+        open ? "w-[250px]" : "w-[60px]"
       )}
-      animate={{
-        width: animate ? (open ? "300px" : "60px") : "300px",
-      }}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      animate={{ width: open ? 250 : 60 }}
+      transition={{ duration: 0.3 }}
       {...props}
     >
+      {/* Toggle Button */}
+      <button
+        className="absolute right-[-16px] top-4 bg-gray-700 p-1 rounded-full shadow-md text-white hover:bg-gray-600"
+        onClick={toggleOpen}
+      >
+        {open ? <IconChevronLeft size={20} /> : <IconChevronRight size={20} />}
+      </button>
+
       {children}
     </motion.div>
   );
 };
 
 export const MobileSidebar = ({ className, children, ...props }) => {
-  const { open, setOpen } = useSidebar();
+  const { open, toggleOpen } = useSidebarStore();
+
   return (
-    <div
-      className={cn(
-        "h-10 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-slate-900 dark:bg-neutral-800 w-full"
-      )}
-      {...props}
-    >
-      <div className="flex justify-end z-20 w-full">
-        <IconMenu2
-          className="text-neutral-200 dark:text-neutral-200 bg-white"
-          onClick={() => setOpen(!open)}
-        />
-      </div>
+    <div className="md:hidden">
+      {/* Toggle Button on Navbar */}
+      <button
+        className="flex items-center bg-black dark:bg-neutral-800 p-4"
+        onClick={() => !open && toggleOpen()}
+      >
+        <IconChevronRight className="text-white" />
+      </button>
+
+      {/* Sidebar Overlay & Panel */}
       <AnimatePresence>
         {open && (
-          <motion.div
-            initial={{ x: "-100%", opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: "-100%", opacity: 0 }}
-            transition={{
-              duration: 0.3,
-              ease: "easeInOut",
-            }}
-            className={cn(
-              "fixed h-full w-full inset-0 bg-white dark:bg-neutral-900 p-10 z-[100] flex flex-col justify-between",
-              className
-            )}
-          >
-            <div
-              className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-neutral-200"
-              onClick={() => setOpen(!open)}
+          <>
+            {/* Click outside to close */}
+            <motion.div
+              className="fixed inset-0 bg-black/50 z-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={toggleOpen}
+            />
+
+            {/* Sidebar Panel - Full Height */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className={cn(
+                "fixed top-0 left-0 h-screen w-64 bg-black dark:bg-neutral-800 p-6 z-50 flex flex-col text-white",
+                className
+              )}
             >
-              <IconX />
-            </div>
-            {children}
-          </motion.div>
+              {/* Close Button */}
+              <button className="absolute right-4 top-4 text-white cursor-pointer" onClick={toggleOpen}>
+                <IconChevronLeft />
+              </button>
+
+              {children}
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>
   );
 };
 
-export const SidebarLink = ({
-  link,
-  className,
-  ...props
-}) => {
-  const { open, animate } = useSidebar();
+export const SidebarLink = ({ link, className, ...props }) => {
+  const { open } = useSidebarStore(); // Zustand for sidebar state
+
   return (
     <Link
-      to={link.href} // Use 'to' instead of 'href'
-      className={cn("flex items-center justify-start gap-2 group/sidebar py-2", className)}
+      to={link.href}
+      className={cn(
+        "flex items-center gap-2 py-2 px-3 text-neutral-200 hover:bg-gray-700 rounded transition-all",
+        className
+      )}
       {...props}
     >
       {link.icon}
-      <motion.span
-        animate={{
-          display: animate ? (open ? "inline-block" : "none") : "inline-block",
-          opacity: animate ? (open ? 1 : 0) : 1,
-        }}
-        className="text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
-      >
-        {link.label}
-      </motion.span>
+
+      {/* Conditional rendering */}
+      {link.label === "Logout" ? (
+        <button onClick={handleLogout}>
+          <motion.span
+            animate={{ opacity: open ? 1 : 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-sm text-white block whitespace-nowrap"
+          >
+            {link.label}
+          </motion.span>
+        </button>
+      ) : (
+        // Render the normal link if not "Logout"
+        <motion.span
+          animate={{ opacity: open ? 1 : 0 }}
+          transition={{ duration: 0.2 }}
+          className="text-sm text-white block whitespace-nowrap"
+        >
+          {link.label}
+        </motion.span>
+      )}
     </Link>
   );
 };
