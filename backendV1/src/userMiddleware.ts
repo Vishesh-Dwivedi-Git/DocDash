@@ -6,6 +6,7 @@ interface AuthRequest extends Request {
 }
 export const  userMiddleware=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>=>{
     try{
+        console.log("in the middleware");
         const token=req.headers["x-auth-token"] as string || req.get("x-auth-token") as string;
         if(!token) {
             res.status(401).send("Invalid Tokens");

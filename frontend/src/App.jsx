@@ -12,6 +12,7 @@ import ProtectedRoute from "./ProtectedRoute"; // Import the ProtectedRoute comp
 import { useAuthStore } from "./store";
 import { useNavigate } from "react-router-dom";
 
+
 function App() {
   return (
     <Router>

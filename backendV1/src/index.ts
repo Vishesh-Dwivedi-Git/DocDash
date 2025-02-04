@@ -1,5 +1,5 @@
-import express, { Request,Response } from "express";
-import { Content, Link, User } from "./db";
+import express, { Request, Response } from "express";
+import { Content, Link, User,Upload } from "./db";
 import bcrypt from "bcrypt"
 import Jwt, { JwtPayload } from "jsonwebtoken";
 import { data } from "./config";
@@ -7,10 +7,26 @@ import { userMiddleware } from "./userMiddleware";
 import { random } from "./utils";
 import mongoose from "mongoose";
 import cors from "cors"
+import multer from "multer"
+import bodyParser from "body-parser"
+
+import { uploadToCloudinary } from "./cloudinary"; // Cloudinary upload function
+
+
+
+// Storing files in memory temporarily
+const storage = multer.diskStorage({
+    filename: (req, file, cb) => {
+      cb(null, `${Date.now()}-${file.originalname}`);
+    },
+  });
+  const upload = multer({ storage: storage }).single("file");
+  
 
 const app=express();
 app.use(express.json());
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true })); // Parse form data
 
 mongoose.connect(data.MongoURL as string)
   .then(() => console.log('Connected to MongoDB'))
@@ -191,6 +207,54 @@ app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
     })
 })
 
+
+
+
+app.post("/api/v1/upload", userMiddleware, upload, async (req: AuthRequest, res: Response):Promise<any> => {
+    try {
+      console.log("Upload API called");
+  
+      const { title, description, fileType } = req.body;
+      console.log(title);
+      const file = req.file?.path;
+      console.log(file);
+      const userId = req.userId;
+  
+      if (!file || !userId) {
+        return res.status(400).json({ message: "File and User ID are required" });
+      }
+  
+      // Upload file to Cloudinary
+      const fileUrl = await uploadToCloudinary(file,fileType);
+  
+      // Save to Database
+      const newUpload = new Upload({ title, description, file: fileUrl, fileType, userId });
+      await newUpload.save();
+  
+      res.status(201).json({ message: "Upload successful", data: newUpload });
+    } catch (err) {
+      console.error("Error in Upload API:", err);
+      res.status(500).json({ message: "Server error", error: err });
+    }
+  });
+  
+app.get("/api/v1/upload",userMiddleware,async (req: AuthRequest, res: Response):Promise<any>=>{
+    const userId=req.userId;
+    try{
+        console.log("under the upload");
+        const uploads= await Upload.find({
+            userId:userId
+        });
+        res.json({
+            uploads
+        });
+    }
+   catch(e){
+    res.status(500).send(`Error Occurred: ${e}`);
+   }
+})
+
 app.listen(3000,()=>{
     console.log('server running on port 3000 !');
 })
+

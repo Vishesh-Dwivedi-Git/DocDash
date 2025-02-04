@@ -43,6 +43,40 @@ const useStore = create((set) => ({
 
 export default useStore;
 
+export const useUploadStore = create((set) => ({
+  uploads: [], // Store uploaded items
+
+  // Fetch uploaded items from API
+  fetchUploads: async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:3000/api/v1/upload", {
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token || "",
+        },
+      });
+
+      console.log("Fetched Uploads:", response.data.uploads);
+      set({ uploads: response.data.uploads });
+    } catch (error) {
+      console.error("Error fetching uploads:", error);
+      set({ uploads: [] });
+    }
+  },
+
+  // Add an uploaded item to the store manually
+  addUpload: (title, description, fileType, fileUrl) => set((state) => ({
+    uploads: [...state.uploads, { title, description, fileType, fileUrl }],
+  })),
+
+  // Reset all uploads in the store
+  resetUploads: () => set({ uploads: [] }),
+}));
+
+
+
+
 
 export const useSidebarStore = create((set) => ({
   open: true, // Default state

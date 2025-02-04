@@ -31,3 +31,15 @@ const linkSchemas=new Schema({
 
 export const Link=mongoose.model("Link",linkSchemas);
 
+const UploadSchema = new mongoose.Schema({
+  title: String,
+  description: String,
+  file: String,
+  fileType: String,
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+  export const Upload = mongoose.model("Upload", UploadSchema);
+
+
+  
