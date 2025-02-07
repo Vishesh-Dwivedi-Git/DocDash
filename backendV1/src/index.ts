@@ -10,7 +10,7 @@ import cors from "cors"
 import multer from "multer"
 import bodyParser from "body-parser"
 
-import { uploadToCloudinary } from "./cloudinary"; // Cloudinary upload function
+import { uploadToCloudinary } from "./cloudinary";                  // Cloudinary upload function
 
 
 
@@ -174,6 +174,50 @@ app.post("/api/v1/share",userMiddleware,async (req:AuthRequest,res:Response):Pro
     }
 })
 
+app.post("/api/v1/upload", userMiddleware, upload, async (req: AuthRequest, res: Response):Promise<any> => {
+    try {
+      console.log("Upload API called");
+  
+      const { title, description, fileType } = req.body;
+      console.log(title);
+      const file = req.file?.path;
+      console.log(file);
+      const userId = req.userId;
+  
+      if (!file || !userId) {
+        return res.status(400).json({ message: "File and User ID are required" });
+      }
+  
+      // Upload file to Cloudinary
+      const fileUrl = await uploadToCloudinary(file,fileType);
+  
+      // Save to Database
+      const newUpload = new Upload({ title, description, file: fileUrl, fileType, userId });
+      await newUpload.save();
+  
+      res.status(201).json({ message: "Upload successful", data: newUpload });
+    } catch (err) {
+      console.error("Error in Upload API:", err);
+      res.status(500).json({ message: "Server error", error: err });
+    }
+});
+app.get("/api/v1/upload", userMiddleware, async (req: AuthRequest, res: Response): Promise<any> => {
+    const userId = req.userId;
+    try {
+        console.log("Fetching uploads for user:", userId);
+        const uploads = await Upload.find({ userId });
+
+        if (!uploads || uploads.length === 0) {
+            return res.status(404).json({ message: "No uploads found" });
+        }
+
+        res.json({ uploads });
+    } catch (e) {
+        console.error("Error fetching uploads:", e);
+        res.status(500).json({ message: "Server error", error: e });
+    }
+});
+
 app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
     const hash=req.params.shareLink;
     console.log(hash);
@@ -209,50 +253,6 @@ app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
 
 
 
-
-app.post("/api/v1/upload", userMiddleware, upload, async (req: AuthRequest, res: Response):Promise<any> => {
-    try {
-      console.log("Upload API called");
-  
-      const { title, description, fileType } = req.body;
-      console.log(title);
-      const file = req.file?.path;
-      console.log(file);
-      const userId = req.userId;
-  
-      if (!file || !userId) {
-        return res.status(400).json({ message: "File and User ID are required" });
-      }
-  
-      // Upload file to Cloudinary
-      const fileUrl = await uploadToCloudinary(file,fileType);
-  
-      // Save to Database
-      const newUpload = new Upload({ title, description, file: fileUrl, fileType, userId });
-      await newUpload.save();
-  
-      res.status(201).json({ message: "Upload successful", data: newUpload });
-    } catch (err) {
-      console.error("Error in Upload API:", err);
-      res.status(500).json({ message: "Server error", error: err });
-    }
-  });
-  
-app.get("/api/v1/upload",userMiddleware,async (req: AuthRequest, res: Response):Promise<any>=>{
-    const userId=req.userId;
-    try{
-        console.log("under the upload");
-        const uploads= await Upload.find({
-            userId:userId
-        });
-        res.json({
-            uploads
-        });
-    }
-   catch(e){
-    res.status(500).send(`Error Occurred: ${e}`);
-   }
-})
 
 app.listen(3000,()=>{
     console.log('server running on port 3000 !');
