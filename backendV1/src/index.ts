@@ -11,6 +11,9 @@ import multer from "multer"
 import bodyParser from "body-parser"
 
 import { uploadToCloudinary } from "./cloudinary";                  // Cloudinary upload function
+import { generateRAGResponse } from "./RAG/generateRAG";
+import {updateEmbeddings} from "./migrationScript"
+
 
 
 
@@ -217,6 +220,18 @@ app.get("/api/v1/upload", userMiddleware, async (req: AuthRequest, res: Response
         res.status(500).json({ message: "Server error", error: e });
     }
 });
+app.post("/query", async (req: Request, res: Response):Promise<any> => {
+    const { query } = req.body;
+    if (!query) return res.status(400).json({ error: "Query is required" });
+  
+    try {
+      const response = await generateRAGResponse(query);
+      res.json({ response });
+    } catch (error) {
+      console.error("RAG Query Error:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 
 app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
     const hash=req.params.shareLink;
@@ -257,4 +272,7 @@ app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
 app.listen(3000,()=>{
     console.log('server running on port 3000 !');
 })
+updateEmbeddings();
+
+
 

@@ -1,6 +1,7 @@
 import mongoose, {Model,Schema} from "mongoose"
 import { Types} from "mongoose"
 
+
 const userSchemas=new Schema({
     username:{type:String ,unique:true},
     password:{type:String , unique:true},
@@ -19,7 +20,8 @@ const contentSchemas= new Schema({
     type:{type:String , enum:contentTypes, required:true},
     title:{type:String , required:true},
     tags:[{type:Types.ObjectId , ref:'Tag'}],
-    userId:{type:Types.ObjectId,ref:'User',required:true}
+    userId:{type:Types.ObjectId,ref:'User',required:true},
+    embedding: { type: [Number], default: [] }, 
 
 });
 export const Content=mongoose.model("Content",contentSchemas);
@@ -37,6 +39,7 @@ const UploadSchema = new mongoose.Schema({
   file: String,
   fileType: String,
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  embedding: { type: [Number], default: [] }, 
 });
 
   export const Upload = mongoose.model("Upload", UploadSchema);

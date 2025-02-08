@@ -1,1 +1,1 @@
-{"root":["./src/cloudinary.ts","./src/config.ts","./src/db.ts","./src/index.ts","./src/usermiddleware.ts","./src/utils.ts"],"version":"5.7.3"}
+{"root":["./src/cloudinary.ts","./src/config.ts","./src/db.ts","./src/index.ts","./src/migrationscript.ts","./src/usermiddleware.ts","./src/utils.ts","./src/rag/cosinesimilarity.ts","./src/rag/embeddingservice.ts","./src/rag/generaterag.ts","./src/rag/retrievesimilar.ts"],"version":"5.7.3"}

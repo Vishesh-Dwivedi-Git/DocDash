@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Sidebar, SidebarLink } from "./ui/sidebar";
 import {
   IconArrowAutofitLeftFilled,
@@ -6,6 +6,7 @@ import {
   IconSettings,
   IconUserBolt,
   IconUserPlus,
+  IconSearch,
 } from "@tabler/icons-react";
 import Button from "../design/Button";
 import ExpandableCard from "./ui/ExpandableCard";
@@ -13,13 +14,10 @@ import AestheticForm, { UploadForm } from "./ui/FormData";
 import UsernameInput from "./ui/Username";
 import useStore from "../../store";
 import SocialMediaCard from "./ui/SocialMediaCard";
-import { useUploadStore } from "../../store"; // Import your Zustand store for uploads
+import { useUploadStore } from "../../store";
 import CardPreview from "./ui/CardPreview";
+import AestheticSearchBar from "./ui/AestheticSearchBar";
 
-
-
-
-// SidebarDemo Component
 export function SidebarDemo() {
   const links = [
     { label: "Dashboard", href: "/dashboard", icon: <IconBrandTabler className="text-purple-500 h-5 w-5" /> },
@@ -45,15 +43,14 @@ export function SidebarDemo() {
   );
 }
 
-// Dashboard Component
 const Dashboard = () => {
   const { items, fetchItems } = useStore();
   const [isCardActive, setIsCardActive] = useState(false);
   const [isActiveUser, setActiveUser] = useState(false);
   const [isUploadActive, setUploadActive] = useState(false);
-  const {fetchUploads}=useUploadStore();
-
-  const uploads = useUploadStore((state) => state.uploads); // Get uploads from Zustand store
+  const { fetchUploads } = useUploadStore();
+  const uploads = useUploadStore((state) => state.uploads);
+  const [isSearchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     fetchItems();
@@ -61,7 +58,19 @@ const Dashboard = () => {
     console.log(uploads);
   }, []);
 
-  console.log(items);
+
+
+  const handleKeyDown = useCallback((e) => {
+    if (e.ctrlKey && e.key === "k") {
+      e.preventDefault();
+      setSearchOpen(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   return (
     <div className="flex-1 p-4 md:p-6 bg-black dark:bg-neutral-900 relative overflow-auto ">
@@ -89,31 +98,34 @@ const Dashboard = () => {
           <div className="flex items-center gap-2">Add Upload</div>
         </Button>
         <ExpandableCard isActive={isUploadActive} onClose={() => setUploadActive(false)} content={<UploadForm />} />
+        <Button onClick={() => setSearchOpen(true)} className="text-xs md:text-sm px-4 py-2 text-white rounded-lg shadow-md">
+          <div className="flex items-center gap-2">
+            <IconSearch className="h-4 w-4" /> Search (Ctrl + K)
+          </div>
+        </Button>
       </div>
+
+      <AestheticSearchBar isOpen={isSearchOpen} onClose={() => setSearchOpen(false)}  />
 
       <div className="w-full bg-gray-100 opacity-50 h-0.5 mx-0"></div>
 
-<div className="overflow-auto">
-  {/* Render SocialMediaCard and CardPreview here */}
-  <div className="flex flex-wrap justify-start gap-4 mt-4">
-        {items.map((item, index) => (
-          <div key={index} className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4">
-            <SocialMediaCard type={item.type} link={item.link} title={item.title} />
-          </div>
-        ))}
-      </div>
+      <div className="overflow-auto">
+        <div className="flex flex-wrap justify-start gap-4 mt-4">
+          {items.map((item, index) => (
+            <div key={index} className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4">
+              <SocialMediaCard type={item.type} link={item.link} title={item.title} />
+            </div>
+          ))}
+        </div>
 
-      {/* Add CardPreview for uploads */}
-      <div className="flex flex-wrap justify-start gap-4 mt-4 overflow-auto">
-        {uploads.map((upload, index) => (
-          <div key={index} className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4">
-            <CardPreview upload={upload} />
-          </div>
-        ))}
+        <div className="flex flex-wrap justify-start gap-4 mt-4 overflow-auto">
+          {uploads.map((upload, index) => (
+            <div key={index} className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4">
+              <CardPreview upload={upload} />
+            </div>
+          ))}
+        </div>
       </div>
-</div>
-
-      
-      </div>
+    </div>
   );
 };
