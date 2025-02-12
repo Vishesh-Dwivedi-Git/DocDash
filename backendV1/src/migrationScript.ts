@@ -1,5 +1,4 @@
 
-import mongoose from "mongoose";
 import { Content } from "./db";
 import { Upload } from "./db";
 import { generateEmbedding } from "./RAG/embeddingService";

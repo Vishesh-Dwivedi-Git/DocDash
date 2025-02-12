@@ -1,6 +1,7 @@
 import axios from "axios";
 import { retrieveSimilarDocs } from "./retrieveSimilar";
 import { data } from "../config";
+import { application } from "express";
 
 const TOGETHER_AI_API_KEY = data.api_Together;
 const HUGGINGFACE_API_KEY = data.api_huggingFace;
@@ -45,3 +46,4 @@ export const generateRAGResponse = async (query: string, model: string = "togeth
     return "I couldn't retrieve an answer.";
   }
 };
+
