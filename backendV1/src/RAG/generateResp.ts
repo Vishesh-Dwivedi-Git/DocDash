@@ -27,7 +27,7 @@ async function generateAIResponse(documents: any[], query: string) {
     try {
       console.log("Generating AI response...");
       const response = await hf.textGeneration({
-        model: "mistralai/Mistral-7B-Instruct", // Use a high-quality LLM
+        model: "tiiuae/falcon-7b-instruct", // Use a high-quality LLM
         inputs: prompt,
       });
 

@@ -5,6 +5,8 @@ const AestheticSearchBar = ({ onSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [aiResponse, setAiResponse] = useState("");
+  const [loading, setLoading] = useState(false); // Loader State
   const searchRef = useRef(null);
 
   useEffect(() => {
@@ -20,24 +22,33 @@ const AestheticSearchBar = ({ onSelect }) => {
   }, []);
 
   const fetchRAGResponse = async () => {
-    if (query.length < 2) return; // Avoid unnecessary calls for short queries
+    if (query.length < 2) return;
+
+    setLoading(true); // Start loading
+    setAiResponse(""); // Reset previous response
 
     try {
-      const response = await fetch("/query", {
+      const response = await fetch("http://localhost:3000/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query }),
       });
+
       const data = await response.json();
+      console.log(data);
       setSearchResults(data.results || []);
+      setAiResponse(data.Response?.replace(/You are an AI assistant.*?answer the query:/i, "").trim() || "No AI response available.");
+
     } catch (error) {
       console.error("Error fetching RAG response:", error);
       setSearchResults([]);
+      setAiResponse("Error fetching AI response.");
     }
+
+    setLoading(false); // Stop loading
   };
 
   const handleSearch = () => fetchRAGResponse();
-
   const handleKeyDown = (event) => {
     if (event.key === "Enter") fetchRAGResponse();
   };
@@ -69,6 +80,20 @@ const AestheticSearchBar = ({ onSelect }) => {
                 <IconX className="w-6 h-6 text-gray-400 hover:text-white" />
               </button>
             </div>
+
+            {/* AI Response */}
+            {loading ? (
+              <div className="mt-4 p-3 bg-neutral-800 rounded-xl shadow-inner text-gray-300 flex items-center justify-center">
+                <span className="animate-pulse text-lg">⏳ Generating AI response...</span>
+              </div>
+            ) : (
+              aiResponse && (
+                <div className="mt-4 p-3 bg-neutral-800 rounded-xl shadow-inner text-gray-300">
+                  <p className="font-semibold">AI Response:</p>
+                  <p className="mt-2 text-white">{aiResponse}</p>
+                </div>
+              )
+            )}
 
             {/* Search Results */}
             <div className="mt-4 max-h-60 overflow-auto bg-neutral-800 p-2 rounded-xl shadow-inner">
