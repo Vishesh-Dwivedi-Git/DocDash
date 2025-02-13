@@ -3,13 +3,20 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+     "build": "tsc -b",
+    "start": "node dist/script.js",
+    "dev": "npm run build && npm run start"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@huggingface/inference": "^3.3.3",
+    "@types/dotenv": "^6.1.1",
+    "@types/mongodb": "^4.0.6",
+    "dotenv": "^16.4.7",
+    "mongodb": "^6.13.0",
     "typescript": "^5.7.3"
   }
 }

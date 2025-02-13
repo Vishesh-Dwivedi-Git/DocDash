@@ -14,5 +14,6 @@ export const data = {
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
   api_Together:process.env.TOGETHER_AI_API_KEY,
-  api_huggingFace:process.env.HUGGINGFACE_API_KEY
+  api_huggingFace:process.env.HF_API_KEY
+
 };

@@ -9,10 +9,15 @@ import mongoose from "mongoose";
 import cors from "cors"
 import multer from "multer"
 import bodyParser from "body-parser"
+import { HfInference } from "@huggingface/inference";
 
 import { uploadToCloudinary } from "./cloudinary";                  // Cloudinary upload function
-import { generateRAGResponse } from "./RAG/generateRAG";
-import {updateEmbeddings} from "./migrationScript"
+import { generateAIResponse } from "./RAG/generateResp";
+import  searchDatabase  from "./RAG/searchDatabase";
+const hfApiKey =data.api_huggingFace;
+const embeddingModel = "sentence-transformers/all-MiniLM-L6-v2"; // Choose appropriate model
+const hf = new HfInference(hfApiKey);
+
 
 
 
@@ -92,11 +97,17 @@ app.post("/api/v1/content",userMiddleware, async (req:AuthRequest,res:Response):
     console.log("hi");
     try{
         //create and store the link
+        const textForEmbedding = `${title} ${link} ${type}`;
+        const response = await hf.featureExtraction({
+            model: embeddingModel,
+            inputs: textForEmbedding,
+          });
         const user= await Content.create({
             link:link,
             type:type,
             title:title,
             tags:[],
+            embedding: response,
             userId:req.userId
         });
         console.log(user)
@@ -195,7 +206,12 @@ app.post("/api/v1/upload", userMiddleware, upload, async (req: AuthRequest, res:
       const fileUrl = await uploadToCloudinary(file,fileType);
   
       // Save to Database
-      const newUpload = new Upload({ title, description, file: fileUrl, fileType, userId });
+      const textForEmbedding = `${title} ${fileType} ${description} ${fileUrl}`;
+      const response = await hf.featureExtraction({
+        model: embeddingModel,
+        inputs: textForEmbedding,
+      });
+      const newUpload = new Upload({ title, description, file: fileUrl, fileType, userId,embedding: response });
       await newUpload.save();
   
       res.status(201).json({ message: "Upload successful", data: newUpload });
@@ -220,18 +236,31 @@ app.get("/api/v1/upload", userMiddleware, async (req: AuthRequest, res: Response
         res.status(500).json({ message: "Server error", error: e });
     }
 });
-app.post("/query", async (req: Request, res: Response):Promise<any> => {
+app.post("/search", async (req: Request, res: Response):Promise<any> => {
     const { query } = req.body;
     if (!query) return res.status(400).json({ error: "Query is required" });
   
-    try {
-      const response = await generateRAGResponse(query);
-      res.json({ response });
-    } catch (error) {
-      console.error("RAG Query Error:", error);
-      res.status(500).json({ error: "Internal Server Error" });
+    console.log(`Received search request: "${query}"`);
+    const searchResults = await searchDatabase(query);
+    let Response = "No relevant answer found.";
+    if(searchResults){
+              Response = await generateAIResponse(searchResults, query);
     }
-});
+  
+    res.json({ results: searchResults, Response });
+  });
+// app.post("/query", async (req: Request, res: Response):Promise<any> => {
+//     const { query } = req.body;
+//     if (!query) return res.status(400).json({ error: "Query is required" });
+  
+//     try {
+//       const response = await generateRAGResponse(query);
+//       res.json({ response });
+//     } catch (error) {
+//       console.error("RAG Query Error:", error);
+//       res.status(500).json({ error: "Internal Server Error" });
+//     }
+// });
 
 app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
     const hash=req.params.shareLink;
@@ -272,7 +301,5 @@ app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
 app.listen(3000,()=>{
     console.log('server running on port 3000 !');
 })
-updateEmbeddings();
-
 
 
