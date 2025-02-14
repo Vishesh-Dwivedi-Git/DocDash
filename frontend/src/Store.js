@@ -90,3 +90,21 @@ export const useAuthStore = create((set) => ({
   login: (token) => set({ isAuthenticated: true,token}),
   logout: () => set({ isAuthenticated: false ,token:null}),
 }));
+
+
+
+export const useShareStore = create((set) => ({
+  showShareBox: false,
+  shareLink: "",
+  copied: false,
+
+  setShowShareBox: (value) => {
+    console.log("🔥 setShowShareBox called with:", value);
+    set({ showShareBox: value });
+  },
+  setShareLink: (link) => {
+    console.log("🔗 Setting Share Link:", link);
+    set({ shareLink: link });
+  },
+  setCopied: (value) => set({ copied: value }),
+}));

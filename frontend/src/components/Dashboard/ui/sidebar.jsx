@@ -4,12 +4,12 @@ import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { IconChevronRight, IconChevronLeft } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
-import { useSidebarStore } from "../../../store"; // Import Zustand store
+import { useSidebarStore ,useShareStore } from "../../../store"; // Import Zustand store
 import Logout from "../../SignIn/Logout";
 
-const handleLogout=()=>{
-  Logout();
-}
+
+
+
 export const Sidebar = ({ children }) => {
   return (
     <>
@@ -20,7 +20,9 @@ export const Sidebar = ({ children }) => {
 };
 
 export const DesktopSidebar = ({ className, children, ...props }) => {
+  
   const { open, toggleOpen } = useSidebarStore(); // Zustand for sidebar state
+  
 
   return (
     <motion.div
@@ -97,11 +99,12 @@ export const MobileSidebar = ({ className, children, ...props }) => {
 };
 
 export const SidebarLink = ({ link, className, ...props }) => {
-  const { open } = useSidebarStore(); // Zustand for sidebar state
+  const { open } = useSidebarStore();
+  const { setShowShareBox } = useShareStore();
+  
 
   return (
-    <Link
-      to={link.href}
+    <div
       className={cn(
         "flex items-center gap-2 py-2 px-3 text-neutral-200 hover:bg-gray-700 rounded transition-all",
         className
@@ -110,27 +113,30 @@ export const SidebarLink = ({ link, className, ...props }) => {
     >
       {link.icon}
 
-      {/* Conditional rendering */}
-      {link.label === "Logout" ? (
-        <button onClick={handleLogout}>
-          <motion.span
-            animate={{ opacity: open ? 1 : 0 }}
-            transition={{ duration: 0.2 }}
-            className="text-sm text-white block whitespace-nowrap"
-          >
+      {/* ✅ Share Button */}
+      {link.label === "Share" ? (
+        <button onClick={() => setShowShareBox(true)}>
+          <motion.span animate={{ opacity: open ? 1 : 0 }} transition={{ duration: 0.2 }}>
             {link.label}
           </motion.span>
         </button>
+      ) : link.label === "Logout" ? (
+        <motion.span animate={{ opacity: open ? 1 : 0 }} transition={{ duration: 0.2 }}>
+           <Logout />
+      </motion.span>
+      ) : link.label === "Dashboard" ? (
+        <Link to="/dashboard">
+          <motion.span animate={{ opacity: open ? 1 : 0 }} transition={{ duration: 0.2 }}>
+            {link.label}
+          </motion.span>
+        </Link>
       ) : (
-        // Render the normal link if not "Logout"
-        <motion.span
-          animate={{ opacity: open ? 1 : 0 }}
-          transition={{ duration: 0.2 }}
-          className="text-sm text-white block whitespace-nowrap"
-        >
-          {link.label}
-        </motion.span>
+        <Link to={link.href}>
+          <motion.span animate={{ opacity: open ? 1 : 0 }} transition={{ duration: 0.2 }}>
+            {link.label}
+          </motion.span>
+        </Link>
       )}
-    </Link>
+    </div>
   );
-};
+}; 

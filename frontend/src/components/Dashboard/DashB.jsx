@@ -7,6 +7,7 @@ import {
   IconUserBolt,
   IconUserPlus,
   IconSearch,
+  IconShare,
 } from "@tabler/icons-react";
 import Button from "../design/Button";
 import ExpandableCard from "./ui/ExpandableCard";
@@ -22,7 +23,7 @@ export function SidebarDemo() {
   const links = [
     { label: "Dashboard", href: "/dashboard", icon: <IconBrandTabler className="text-purple-500 h-5 w-5" /> },
     { label: "Profile", href: "/profile", icon: <IconUserBolt className="text-purple-500 h-5 w-5" /> },
-    { label: "Settings", href: "/settings", icon: <IconSettings className="text-purple-500 h-5 w-5" /> },
+    { label: "Share", href: "/Share", icon: <IconShare className="text-purple-500 h-5 w-5" /> },
     { label: "Logout", href: "/logout", icon: <IconArrowAutofitLeftFilled className="text-purple-500 h-5 w-5" /> },
   ];
 

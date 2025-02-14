@@ -11,6 +11,7 @@ import Sign from "./components/SignIn/Sign";
 import ProtectedRoute from "./ProtectedRoute"; // Import the ProtectedRoute component
 import { useAuthStore } from "./store";
 import { useNavigate } from "react-router-dom";
+import ShareBox from "./components/Dashboard/ui/sidebarComponents/ShareBox";
 
 
 function App() {
@@ -40,6 +41,7 @@ function AppWithRouter() {
     <div className="min-h-screen bg-black text-white">
       <Routes>
         {/* Login Page */}
+     
         <Route path="/login" element={<Sign />} />
 
         {/* Protected Dashboard Route */}
@@ -68,6 +70,7 @@ function AppWithRouter() {
       </Routes>
 
       {/* Button Gradient Component */}
+      <ShareBox /> 
       <ButtonGradient />
     </div>
   );

@@ -26,9 +26,7 @@ export function SocialMediaCard({ title, link, type }) {
   return (
     <div className="relative p-4 bg-black bg-opacity-50 backdrop-blur-md rounded-2xl border border-purple-500 shadow-lg transition-transform transform hover:scale-105 max-w-80 min-w-72">
       <div className="absolute top-2 right-2 flex gap-2">
-        <a href={link} target="_blank" rel="noopener noreferrer">
-          <FaShareAlt className="text-gray-400 hover:text-gray-200 transition duration-300 cursor-pointer" />
-        </a>
+       
         <FaTrash className="text-red-500 hover:text-red-700 transition duration-300 cursor-pointer" title="Delete Post" />
       </div>
 
