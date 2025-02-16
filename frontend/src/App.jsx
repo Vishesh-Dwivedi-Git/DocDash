@@ -6,7 +6,7 @@ import Features from "./components/LandingPage/Features";
 import Pricing from "./components/LandingPage/Pricing";
 import Footer from "./components/LandingPage/Footer";
 import ButtonGradient from "./assets/ButtonGradient";
-import { SidebarDemo } from "./components/Dashboard/DashB";
+import { SidebarDemo } from "./components/Dashboard/Dashb";
 import Sign from "./components/SignIn/Sign";
 import ProtectedRoute from "./ProtectedRoute"; // Import the ProtectedRoute component
 import { useAuthStore } from "./Store";
