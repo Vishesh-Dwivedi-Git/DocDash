@@ -157,6 +157,7 @@ app.delete("/api/v1/content",userMiddleware,async (req:AuthRequest,res:Response)
 })
 
 app.post("/api/v1/share",userMiddleware,async (req:AuthRequest,res:Response):Promise<any>=>{
+    console.log("Entered Share ...");
     const share=req.body.share;
     if(share){
         const existingLink=await Link.findOne({

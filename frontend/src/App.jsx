@@ -12,6 +12,7 @@ import ProtectedRoute from "./ProtectedRoute"; // Import the ProtectedRoute comp
 import { useAuthStore } from "./Store";
 import { useNavigate } from "react-router-dom";
 import ShareBox from "./components/Dashboard/ui/sidebarComponents/ShareBox";
+import SharableDashboard from "./components/Dashboard/ui/sharableDashB";
 
 
 function App() {
@@ -53,6 +54,7 @@ function AppWithRouter() {
             />
           }
         />
+        <Route path="/share/:hash" element={<SharableDashboard/>} />
 
         {/* Landing Page */}
         <Route
