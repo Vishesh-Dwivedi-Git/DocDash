@@ -11,7 +11,7 @@ const SharableDashboard = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:3000/api/v1/share/${hash}`)
+    fetch(`http://localhost:3000/api/v1/${hash}`)
       .then((res) => res.json())
       .then((data) => {
         setDashboardData(data);

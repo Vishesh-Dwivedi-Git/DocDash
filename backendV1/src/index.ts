@@ -296,6 +296,26 @@ app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
     })
 })
 
+app.get("/api/v1/profile",userMiddleware,async (req:AuthRequest,res:Response):Promise<any>=>{
+    const userId=req.userId;
+    const user=await User.findOne({ _id:userId});
+    if(!user){
+        res.status(411).json({
+            message:"User not found"
+        })
+    }
+
+    const content=await Content.find({
+        userId:userId});
+    
+    res.json({
+        username:user?.username as string   
+    });
+
+
+})      
+
+
 
 
 
