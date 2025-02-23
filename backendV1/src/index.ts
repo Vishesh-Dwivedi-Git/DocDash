@@ -237,6 +237,32 @@ app.get("/api/v1/upload", userMiddleware, async (req: AuthRequest, res: Response
         res.status(500).json({ message: "Server error", error: e });
     }
 });
+app.get("/api/v1/profile",userMiddleware,async (req:AuthRequest,res:Response):Promise<any>=>{
+    console.log("Profile API called");
+    const userId=req.userId;
+    const user=await User.findOne({ _id:userId});
+    if(!user){
+        res.status(411).json({
+            message:"User not found"
+        })
+    }
+
+    const content=await Content.find({
+        userId:userId});
+    const uploads = await Upload.find({ userId:userId
+    }); 
+    const countContent=content.length;
+    const countUploads=uploads.length;
+    console.log(countUploads);
+    
+    res.json({
+        username:user?.username as string   ,
+        contentCount:countContent,
+        uploadsCount:countUploads
+    });
+
+
+})  
 app.post("/search", async (req: Request, res: Response):Promise<any> => {
     const { query } = req.body;
     if (!query) return res.status(400).json({ error: "Query is required" });
@@ -250,6 +276,7 @@ app.post("/search", async (req: Request, res: Response):Promise<any> => {
   
     res.json({ results: searchResults, Response });
   });
+     
 // app.post("/query", async (req: Request, res: Response):Promise<any> => {
 //     const { query } = req.body;
 //     if (!query) return res.status(400).json({ error: "Query is required" });
@@ -283,6 +310,11 @@ app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
     const user=await User.findOne({
         _id:link.userId
     }); 
+    const uploads = await Upload.find({ userId:link.userId
+    });
+    const TotalContent=content.length;
+    const TotalUploads=uploads.length;
+
     console.log(link);
     if(!user){
         res.status(411).json({
@@ -292,28 +324,14 @@ app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
 
     res.json({
         username:user?.username,
-        content:content
+        content:content,
+        uploads:uploads,
+        TotalContent:TotalContent,
+        TotalUploads:TotalUploads   
     })
 })
 
-app.get("/api/v1/profile",userMiddleware,async (req:AuthRequest,res:Response):Promise<any>=>{
-    const userId=req.userId;
-    const user=await User.findOne({ _id:userId});
-    if(!user){
-        res.status(411).json({
-            message:"User not found"
-        })
-    }
 
-    const content=await Content.find({
-        userId:userId});
-    
-    res.json({
-        username:user?.username as string   
-    });
-
-
-})      
 
 
 

@@ -9,7 +9,7 @@ import ButtonGradient from "./assets/ButtonGradient";
 import { SidebarDemo } from "./components/Dashboard/Dashb";
 import Sign from "./components/SignIn/Sign";
 import ProtectedRoute from "./ProtectedRoute"; // Import the ProtectedRoute component
-import { useAuthStore } from "./Store";
+import { useAuthStore } from "./store";
 import { useNavigate } from "react-router-dom";
 import ShareBox from "./components/Dashboard/ui/sidebarComponents/ShareBox";
 import SharableDashboard from "./components/Dashboard/ui/sharableDashB";
@@ -22,6 +22,7 @@ function App() {
     </Router>
   );
 }
+import ProfileLayout from "./components/Dashboard/ui/profilePage";
 
 function AppWithRouter() {
   const login = useAuthStore((state) => state.login);
@@ -55,6 +56,8 @@ function AppWithRouter() {
           }
         />
         <Route path="/share/:hash" element={<SharableDashboard/>} />
+        <Route path="/share" element={<SharableDashboard/>} />
+        <Route path="/profile" element={<ProfileLayout />} />
 
         {/* Landing Page */}
         <Route
