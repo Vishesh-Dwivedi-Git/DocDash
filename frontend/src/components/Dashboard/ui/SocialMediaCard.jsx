@@ -22,7 +22,7 @@ const platformIcons = {
   linkedin: <FaLinkedin className="text-blue-600 text-2xl" />,
 };
 
-export function SocialMediaCard({ title, link, type }) {
+export default function SocialMediaCard({ title, link, type }) {
   return (
     <div className="relative p-4 bg-black bg-opacity-50 backdrop-blur-md rounded-2xl border border-purple-500 shadow-lg transition-transform transform hover:scale-105 max-w-80 min-w-72">
       <div className="absolute top-2 right-2 flex gap-2">
@@ -52,4 +52,4 @@ SocialMediaCard.propTypes = {
   type: PropTypes.oneOf(["twitter", "youtube", "instagram", "linkedin"]).isRequired,
 };
 
-export default SocialMediaCard;
+

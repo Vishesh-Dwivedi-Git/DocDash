@@ -315,19 +315,20 @@ app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
     const TotalContent=content.length;
     const TotalUploads=uploads.length;
 
-    console.log(link);
+    console.log(uploads);
+    console.log(TotalUploads);  
     if(!user){
         res.status(411).json({
             message:"user not found , error should ideally not happen"
         })
     }
-
+    
     res.json({
         username:user?.username,
+        TotalContent:TotalContent,
+        TotalUploads:TotalUploads,
         content:content,
         uploads:uploads,
-        TotalContent:TotalContent,
-        TotalUploads:TotalUploads   
     })
 })
 

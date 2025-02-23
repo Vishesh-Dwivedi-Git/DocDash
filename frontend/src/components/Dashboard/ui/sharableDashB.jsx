@@ -34,8 +34,11 @@ export function SidebarDemo() {
 
 const Dashboard = () => {
   const { hash } = useParams();
-  const [items, setItems] = useState([]);
+  const [username, setUsername] = useState("");
+  const [content, setContent] = useState([]);
   const [uploads, setUploads] = useState([]);
+  const [totalContent, setTotalContent] = useState(0);
+  const [totalUploads, setTotalUploads] = useState(0);
   const [isSearchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
@@ -43,8 +46,12 @@ const Dashboard = () => {
       fetch(`http://localhost:3000/api/v1/${hash}`)
         .then((response) => response.json())
         .then((data) => {
-          setItems(data.items || []);
+          console.log("✅ API Response:", data);
+          setUsername(data.username || "");
+          setContent(data.content || []);
           setUploads(data.uploads || []);
+          setTotalContent(data.TotalContent || 0);
+          setTotalUploads(data.TotalUploads || 0);
         })
         .catch((error) => console.error("Error fetching data:", error));
     }
@@ -64,7 +71,8 @@ const Dashboard = () => {
 
   return (
     <div className="flex-1 p-4 md:p-6 bg-black dark:bg-neutral-900 relative overflow-auto">
-      <div className="flex justify-end items-center mb-4 relative z-10 overflow-hidden">
+      <div className="flex justify-between items-center mb-4 relative z-10 overflow-hidden">
+        <h1 className="text-white text-lg font-bold">Welcome, To the Sharable Dashboard of <span className="text-purple-500 text-lg font-extrabold"> {username}</span></h1>
         <Button onClick={() => setSearchOpen(true)} className="text-xs md:text-sm px-4 py-2 text-white rounded-lg shadow-md">
           <div className="flex items-center gap-2">
             <IconSearch className="h-4 w-4" /> Search (Ctrl + K)
@@ -73,9 +81,13 @@ const Dashboard = () => {
       </div>
       <AestheticSearchBar isOpen={isSearchOpen} onClose={() => setSearchOpen(false)} />
       <div className="w-full bg-gray-100 opacity-50 h-0.5 mx-0"></div>
+      <div className="text-white mt-4">
+        <p>Total Content: <span className="text-purple-500">{totalContent}</span></p>
+        <p>Total Uploads: <span className="text-purple-500">{totalUploads}</span></p>
+      </div>
       <div className="overflow-auto">
         <div className="flex flex-wrap justify-start gap-4 mt-4">
-          {items.map((item, index) => (
+          {content.map((item, index) => (
             <div key={index} className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4">
               <SocialMediaCard type={item.type} link={item.link} title={item.title} />
             </div>

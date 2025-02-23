@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-scroll';
 import Button from '../design/Button';
 import '../../index.css';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../store';
 
 const navigation = [
   { name: 'Home', href: 'Home' },
@@ -11,6 +13,9 @@ const navigation = [
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const login=useAuthStore((state)=>state.login);
+  const isAutnenticated=useAuthStore((state)=>state.isAuthenticated);
+  const navigate=useNavigate();
 
   return (
     <nav className="bg-black bg-opacity-60 backdrop-blur-lg fixed w-full z-50">
@@ -41,9 +46,24 @@ export default function Header() {
 
           {/* Right Section: Sign In (aligns with nav items) */}
           <div className="hidden md:flex items-center"> {/* Added flex and items-center */}
-            <Button href="/login" className="font-code font-bold text-lg">
-              Sign In
-            </Button>
+          <Button  className="font-code font-semibold text-lg">
+
+                  <button 
+                   onClick={() => {
+                      const token = localStorage.getItem("token");
+                      if (token) {
+                          login(token);  // Log in using stored token
+                           navigate("/dashboard");  //  Redirect to dashboard if token exists
+                       } else {
+                            navigate("/login");  // Go to login page if no token
+                            }
+                          }}
+                    className="font-code font-semibold text-lg"
+                                >
+                          Get Started
+                      </button>
+
+           </Button>
           </div>
 
           {/* Hamburger Menu for Mobile */}
@@ -86,14 +106,30 @@ export default function Header() {
                 to={item.href}
                 smooth={true}
                 duration={500}
-                className="font-code text-gray-200 hover:text-purple-400 block px-3 py-2 rounded-md text-base font-semibold transition-all cursor-pointer text-lg"
+                className="font-code text-gray-200 hover:text-purple-400 block px-3 py-2 rounded-md font-semibold transition-all cursor-pointer text-lg"
                 onClick={() => setIsOpen(false)}
               >
                 {item.name}
               </Link>
             ))}
-            <Button href="/login" className="font-code font-semibold text-lg">
-              Sign In
+            <Button  className="font-code font-semibold text-lg">
+
+             <button 
+            onClick={() => {
+            const token = localStorage.getItem("token");
+              if (token) {
+             login(token);  // Log in using stored token
+             navigate("/dashboard");  //  Redirect to dashboard if token exists
+            } else {
+             navigate("/login");  // Go to login page if no token
+           }
+           console.log(isAutnenticated);
+         }}
+           className="font-code font-semibold text-lg"
+         >
+     Get Started
+</button>
+
             </Button>
           </div>
         </div>
