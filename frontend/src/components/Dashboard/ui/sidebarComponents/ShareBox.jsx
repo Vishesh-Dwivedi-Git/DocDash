@@ -10,7 +10,7 @@ const ShareBox = () => {
 
   useEffect(() => {
     if (showShareBox) {
-      fetch("https://docdash-backend.onrender.com/api/v1/share", {
+      fetch("http://localhost:3000/api/v1/share", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -22,7 +22,7 @@ const ShareBox = () => {
         .then((data) => {
           console.log("✅ API Response:", data.hash);
           // Append localhost:3000 in front of the hash
-          setShareLink(`https://docdash-backend.onrender.com/share/${data.hash}`);
+          setShareLink(`http://localhost:5173/share/${data.hash}`);
         })
         .catch((err) => console.error("❌ Error fetching share link:", err));
     }

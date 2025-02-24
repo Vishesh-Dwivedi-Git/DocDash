@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect,useMemo, useState, useCallback } from "react";
 import { Sidebar, SidebarLink } from "./ui/sidebar";
 import {
   IconArrowAutofitLeftFilled,
   IconBrandTabler,
-  IconSettings,
   IconUserBolt,
   IconUserPlus,
   IconSearch,
@@ -17,7 +16,7 @@ import useStore from "../../store";
 import SocialMediaCard from "./ui/SocialMediaCard";
 import { useUploadStore } from "../../store";
 import CardPreview from "./ui/CardPreview";
-import AestheticSearchBar from "./ui/AestheticSearchBar";
+import SearchBar from "./ui/Search";
 
 export function SidebarDemo() {
   const links = [
@@ -45,13 +44,17 @@ export function SidebarDemo() {
 }
 
 const Dashboard = () => {
-  const { items, fetchItems } = useStore();
+  const {  fetchItems } = useStore();
   const [isCardActive, setIsCardActive] = useState(false);
   const [isActiveUser, setActiveUser] = useState(false);
   const [isUploadActive, setUploadActive] = useState(false);
   const { fetchUploads } = useUploadStore();
   const uploads = useUploadStore((state) => state.uploads);
   const [isSearchOpen, setSearchOpen] = useState(false);
+  const query1= useStore((state)=>state.searchQuery);
+  const query2= useUploadStore((state)=>state.searchQuery);
+  
+
 
   useEffect(() => {
     fetchItems();
@@ -59,7 +62,8 @@ const Dashboard = () => {
     console.log(uploads);
   }, []);
 
-
+  const filteredItems = useMemo(() => useStore.getState().filterItems(), [query1]);
+  const filteredUploads = useMemo(() => useUploadStore.getState().filterUploads(), [query2]);
 
   const handleKeyDown = useCallback((e) => {
     if (e.ctrlKey && e.key === "k") {
@@ -106,13 +110,13 @@ const Dashboard = () => {
         </Button>
       </div>
 
-      <AestheticSearchBar isOpen={isSearchOpen} onClose={() => setSearchOpen(false)}  />
+      <SearchBar isOpen={isSearchOpen} onClose={() => setSearchOpen(false)}  />
 
       <div className="w-full bg-gray-100 opacity-50 h-0.5 mx-0"></div>
 
       <div className="overflow-auto">
         <div className="flex flex-wrap justify-start gap-4 mt-4">
-          {items.map((item, index) => (
+          {filteredItems.map((item, index) => (
             <div key={index} className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4">
               <SocialMediaCard type={item.type} link={item.link} title={item.title} />
             </div>
@@ -120,7 +124,7 @@ const Dashboard = () => {
         </div>
 
         <div className="flex flex-wrap justify-start gap-4 mt-4 overflow-auto">
-          {uploads.map((upload, index) => (
+          {filteredUploads.map((upload, index) => (
             <div key={index} className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4">
               <CardPreview upload={upload} />
             </div>

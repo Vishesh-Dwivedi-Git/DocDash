@@ -8,7 +8,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    axios.get("https://docdash-backend.onrender.com/api/v1/profile", {
+    axios.get("http://localhost:3000/api/v1/profile", {
       headers: {
         "x-auth-token": token || "", // Add token to headers
       },

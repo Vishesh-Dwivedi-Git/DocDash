@@ -5,7 +5,7 @@ import { useAuthStore } from "../../store";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { FaGoogle, FaGithub, FaDiscord } from "react-icons/fa";
+import { FaGithub, FaDiscord } from "react-icons/fa";
 
 export default function Sign() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -14,7 +14,7 @@ export default function Sign() {
   const [emailError, setEmailError] = useState("");
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-  const backendURL = "https://docdash-backend.onrender.com/api/v1";
+  const backendURL = "http://localhost:3000/api/v1";
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
