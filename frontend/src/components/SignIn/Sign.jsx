@@ -11,6 +11,7 @@ export default function Sign() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   const backendURL = "http://localhost:3000/api/v1";
@@ -27,8 +28,18 @@ export default function Sign() {
     }
   }, [navigate, login]);
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    if (!validateEmail(username)) {
+      setEmailError("Invalid email address");
+      return;
+    }
+    setEmailError("");
     const userData = { username, password };
 
     try {
@@ -56,13 +67,14 @@ export default function Sign() {
 
         <form onSubmit={handleFormSubmit} className="w-96 flex flex-col space-y-5">
           <input
-            type="text"
-            placeholder="Username"
+            type="email"
+            placeholder="Email"
             className="bg-gray-900 px-4 py-3 rounded-md text-white focus:ring-2 focus:ring-purple-500 outline-none shadow-md"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
           />
+          {emailError && <p className="text-red-500 text-sm">{emailError}</p>}
           <input
             type="password"
             placeholder="Password"
