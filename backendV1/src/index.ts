@@ -17,6 +17,11 @@ import  searchDatabase  from "./RAG/searchDatabase";
 const hfApiKey =data.api_huggingFace;
 const embeddingModel = "sentence-transformers/all-MiniLM-L6-v2"; // Choose appropriate model
 const hf = new HfInference(hfApiKey);
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as GitHubStrategy } from "passport-github2";
+import { Strategy as DiscordStrategy } from "passport-discord";
+
 
 
 
@@ -87,6 +92,127 @@ app.post("/api/v1/signIn",async (req:Request,res:Response ):Promise<any> =>{
    
 
 })
+
+
+
+// 🔹 Generate JWT Token
+const generateToken = (email: string): string => {
+    return Jwt.sign({ email }, data.JwtPassword as string, { expiresIn: "7d" });
+  };
+  
+  // 🔹 Google OAuth
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: data.google_client_id as string,
+        clientSecret: data.google_client_secret as string,
+        callbackURL: "/api/v1/oauth/google/callback",
+      },
+      async (_accessToken, _refreshToken, profile, done) => {
+        try {
+          const email = profile.emails?.[0]?.value;
+          if (!email) return done(new Error("Email not found"), undefined);
+  
+          const user = await User.findOneAndUpdate(
+            { email },
+            { email },
+            { upsert: true, new: true }
+          );
+  
+          return done(null, user);
+        } catch (error) {
+          return done(error);
+        }
+      }
+    )
+  );
+  
+  // 🔹 GitHub OAuth
+  passport.use(
+    new GitHubStrategy(
+      {
+        clientID: data.github_client_id as string,
+        clientSecret: data.github_client_secret as string,
+        callbackURL: "/api/v1/oauth/github/callback",
+        scope: ["user:email"],
+      },
+      async (_accessToken: any, _refreshToken: any, profile: { emails: { value: string; }[]; username: any; }, done: (arg0: unknown, arg1: (mongoose.Document<unknown, {}, { username?: string | null | undefined; password?: string | null | undefined; }> & { username?: string | null | undefined; password?: string | null | undefined; } & { _id: mongoose.Types.ObjectId; } & { __v: number; }) | null | undefined) => any) => {
+        try {
+          let email = profile.emails?.[0]?.value || `${profile.username}@github.com`;
+          if (!email) return done(new Error("Email not found"), undefined);
+  
+          const user = await User.findOneAndUpdate(
+            { email },
+            { email },
+            { upsert: true, new: true }
+          );
+  
+          return done(null, user);
+        } catch (error) {
+          return done(error, undefined);
+        }
+      }
+    )
+  );
+  
+  // 🔹 Discord OAuth
+  passport.use(
+    new DiscordStrategy(
+      {
+        clientID: data.discord_client_id as string,
+        clientSecret: data.discord_client_secret as string,
+        callbackURL: "/api/v1/oauth/discord/callback",
+        scope: ["identify", "email"],
+      },
+      async (_accessToken, _refreshToken, profile, done) => {
+        try {
+          let email = profile.email || `${profile.username}@discord.com`;
+          if (!email) return done(new Error("Email not found"), undefined);
+  
+          const user = await User.findOneAndUpdate(
+            { email },
+            { email },
+            { upsert: true, new: true }
+          );
+  
+          return done(null, user);
+        } catch (error) {
+          return done(error);
+        }
+      }
+    )
+  );
+  
+  // 🔹 API Routes
+  app.get("/api/v1/oauth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+  app.get(
+    "/api/v1/oauth/google/callback",
+    passport.authenticate("google", { session: false }),
+    (req: Request, res: Response) => {
+      const token = generateToken((req.user as { email: string }).email);
+      res.redirect(`${data.frontend_url}?token=${token}`);
+    }
+  );
+  
+  app.get("/api/v1/oauth/github", passport.authenticate("github"));
+  app.get(
+    "/api/v1/oauth/github/callback",
+    passport.authenticate("github", { session: false }),
+    (req: Request, res: Response) => {
+      const token = generateToken((req.user as { email: string }).email);
+      res.redirect(`${data.frontend_url}?token=${token}`);
+    }
+  );
+  
+  app.get("/api/v1/oauth/discord", passport.authenticate("discord"));
+  app.get(
+    "/api/v1/oauth/discord/callback",
+    passport.authenticate("discord", { session: false }),
+    (req: Request, res: Response) => {
+      const token = generateToken((req.user as { email: string }).email);
+      res.redirect(`${data.frontend_url}?token=${token}`);
+    }
+  );
 
 interface AuthRequest extends Request{
     userId?:string | JwtPayload
