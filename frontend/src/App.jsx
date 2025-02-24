@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Header from "./components/LandingPage/Header";
 import Hero from "./components/LandingPage/Hero";
@@ -9,8 +9,6 @@ import ButtonGradient from "./assets/ButtonGradient";
 import { SidebarDemo } from "./components/Dashboard/Dashb";
 import Sign from "./components/SignIn/Sign";
 import ProtectedRoute from "./ProtectedRoute"; // Import the ProtectedRoute component
-import { useAuthStore } from "./store";
-import { useNavigate } from "react-router-dom";
 import ShareBox from "./components/Dashboard/ui/sidebarComponents/ShareBox";
 import SharableDashboard from "./components/Dashboard/ui/sharableDashB";
 import ProfileLayout from "./components/Dashboard/ui/profilePage";

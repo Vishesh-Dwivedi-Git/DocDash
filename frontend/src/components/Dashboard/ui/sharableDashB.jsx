@@ -43,7 +43,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (hash) {
-      fetch(`http://localhost:3000/api/v1/${hash}`)
+      fetch(`https://docdash-backend.onrender.com/api/v1/${hash}`)
         .then((response) => response.json())
         .then((data) => {
           console.log("✅ API Response:", data);
