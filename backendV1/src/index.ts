@@ -96,123 +96,159 @@ app.post("/api/v1/signIn",async (req:Request,res:Response ):Promise<any> =>{
 
 
 // 🔹 Generate JWT Token
-const generateToken = (email: string): string => {
-    return Jwt.sign({ email }, data.JwtPassword as string, { expiresIn: "7d" });
-  };
+const generateToken = (user: { _id: string }): string => {
+  return Jwt.sign(
+    { id: user._id, }, // Include userId
+    data.JwtPassword as string,
+    { expiresIn: "7d" }
+  );
+};
+
   
   // 🔹 Google OAuth
-  passport.use(
-    new GoogleStrategy(
-      {
-        clientID: data.google_client_id as string,
-        clientSecret: data.google_client_secret as string,
-        callbackURL: "/api/v1/oauth/google/callback",
-      },
-      async (_accessToken, _refreshToken, profile, done) => {
-        try {
-          const email = profile.emails?.[0]?.value;
-          if (!email) return done(new Error("Email not found"), undefined);
-  
-          const user = await User.findOneAndUpdate(
-            { email },
-            { email },
-            { upsert: true, new: true }
-          );
-  
-          return done(null, user);
-        } catch (error) {
-          return done(error);
-        }
+ // 🔹 Google OAuth
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: data.google_client_id as string,
+      clientSecret: data.google_client_secret as string,
+      callbackURL: "/api/v1/oauth/google/callback",
+      state: false, // Ensures better security (anti-CSRF)
+    },
+    async (_accessToken, _refreshToken, profile, done) => {
+      try {
+        const username = profile.emails?.[0]?.value;
+        if (!username) return done(new Error("Email not found"), undefined);
+
+        const user = await User.findOneAndUpdate(
+          { username },
+          { $set: { username } }, // Ensure email is set
+          { upsert: true, new: true }
+        );
+
+        return done(null, user);
+      } catch (error) {
+        console.error("hI ricky Google OAuth Error:", error);
+        return done(error);
       }
-    )
-  );
-  
-  // 🔹 GitHub OAuth
-  passport.use(
-    new GitHubStrategy(
-      {
-        clientID: data.github_client_id as string,
-        clientSecret: data.github_client_secret as string,
-        callbackURL: "/api/v1/oauth/github/callback",
-        scope: ["user:email"],
-      },
-      async (_accessToken: any, _refreshToken: any, profile: { emails: { value: string; }[]; username: any; }, done: (arg0: unknown, arg1: (mongoose.Document<unknown, {}, { username?: string | null | undefined; password?: string | null | undefined; }> & { username?: string | null | undefined; password?: string | null | undefined; } & { _id: mongoose.Types.ObjectId; } & { __v: number; }) | null | undefined) => any) => {
-        try {
-          let email = profile.emails?.[0]?.value || `${profile.username}@github.com`;
-          if (!email) return done(new Error("Email not found"), undefined);
-  
-          const user = await User.findOneAndUpdate(
-            { email },
-            { email },
-            { upsert: true, new: true }
-          );
-  
-          return done(null, user);
-        } catch (error) {
-          return done(error, undefined);
-        }
+    }
+  )
+);
+
+// 🔹 GitHub OAuth
+passport.use(
+  new GitHubStrategy(
+    {
+      clientID: data.github_client_id as string,
+      clientSecret: data.github_client_secret as string,
+      callbackURL: "/api/v1/oauth/github/callback",
+      scope: ["user:email"],
+    },
+    async (_accessToken: any, _refreshToken: any, profile: { emails: { value: string; }[]; username: any; }, done: (arg0: unknown, arg1: (mongoose.Document<unknown, {}, { username?: string | null | undefined; password?: string | null | undefined; }> & { username?: string | null | undefined; password?: string | null | undefined; } & { _id: mongoose.Types.ObjectId; } & { __v: number; }) | undefined) => any) => {
+      try {
+        let email = profile.emails?.[0]?.value || `${profile.username}@github.com`;
+        if (!email) return done(new Error("Email not found"), undefined);
+
+        const user = await User.findOneAndUpdate(
+          { email },
+          { $set: { email } },
+          { upsert: true, new: true }
+        );
+
+        return done(null, user);
+      } catch (error) {
+        console.error("GitHub OAuth Error:", error);
+        return done(error,undefined);
       }
-    )
-  );
-  
-  // 🔹 Discord OAuth
-  passport.use(
-    new DiscordStrategy(
-      {
-        clientID: data.discord_client_id as string,
-        clientSecret: data.discord_client_secret as string,
-        callbackURL: "/api/v1/oauth/discord/callback",
-        scope: ["identify", "email"],
-      },
-      async (_accessToken, _refreshToken, profile, done) => {
-        try {
-          let email = profile.email || `${profile.username}@discord.com`;
-          if (!email) return done(new Error("Email not found"), undefined);
-  
-          const user = await User.findOneAndUpdate(
-            { email },
-            { email },
-            { upsert: true, new: true }
-          );
-  
-          return done(null, user);
-        } catch (error) {
-          return done(error);
-        }
+    }
+  )
+);
+
+// 🔹 Discord OAuth
+passport.use(
+  new DiscordStrategy(
+    {
+      clientID: data.discord_client_id as string,
+      clientSecret: data.discord_client_secret as string,
+      callbackURL: "/api/v1/oauth/discord/callback",
+      scope: ["identify", "email"],
+    },
+    async (_accessToken, _refreshToken, profile, done) => {
+      try {
+        let email = profile.email || `${profile.username}@discord.com`;
+        if (!email) return done(new Error("Email not found"), undefined);
+
+        const user = await User.findOneAndUpdate(
+          { email },
+          { $set: { email } },
+          { upsert: true, new: true }
+        );
+
+        return done(null, user);
+      } catch (error) {
+        console.error("Discord OAuth Error:", error);
+        return done(error);
       }
-    )
-  );
-  
-  // 🔹 API Routes
-  app.get("/api/v1/oauth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
-  app.get(
-    "/api/v1/oauth/google/callback",
-    passport.authenticate("google", { session: false }),
-    (req: Request, res: Response) => {
-      const token = generateToken((req.user as { email: string }).email);
-      res.redirect(`${data.frontend_url}?token=${token}`);
     }
-  );
-  
-  app.get("/api/v1/oauth/github", passport.authenticate("github"));
-  app.get(
-    "/api/v1/oauth/github/callback",
-    passport.authenticate("github", { session: false }),
-    (req: Request, res: Response) => {
-      const token = generateToken((req.user as { email: string }).email);
-      res.redirect(`${data.frontend_url}?token=${token}`);
+  )
+);
+
+// 🔹 API Routes
+app.get("/api/v1/oauth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+app.get(
+  "/api/v1/oauth/google/callback",
+  passport.authenticate("google", { session: false }),
+  (req: Request, res: Response): void => {
+    if (!req.user) {
+      console.error("OAuth failed, no user object received.");
+      res.status(401).json({ error: "OAuth failed" });
+      return;
     }
-  );
-  
-  app.get("/api/v1/oauth/discord", passport.authenticate("discord"));
-  app.get(
-    "/api/v1/oauth/discord/callback",
-    passport.authenticate("discord", { session: false }),
-    (req: Request, res: Response) => {
-      const token = generateToken((req.user as { email: string }).email);
-      res.redirect(`${data.frontend_url}?token=${token}`);
+
+    const user = req.user as { _id: string;};
+    const token = generateToken(user);
+    console.log("Generated Token:", token);
+
+    return res.redirect(`${data.frontend_url}?token=${token}`);
+  }
+);
+
+app.get("/api/v1/oauth/github", passport.authenticate("github"));
+
+app.get(
+  "/api/v1/oauth/github/callback",
+  passport.authenticate("github", { session: false }),
+  (req: Request, res: Response): void => {
+    if (!req.user) {
+      console.error("OAuth failed, no user object received.");
+      res.status(401).json({ error: "OAuth failed" });
+      return ;
     }
-  );
+    const user = req.user as { _id: string;};
+    const token = generateToken(user);
+   // res.redirect(`${data.frontend_url}?token=${token}`);
+   return res.redirect(`${data.frontend_url}?token=${token}`);
+  }
+);
+
+app.get("/api/v1/oauth/discord", passport.authenticate("discord"));
+
+app.get(
+  "/api/v1/oauth/discord/callback",
+  passport.authenticate("discord", { session: false }),
+  (req: Request, res: Response):void => {
+    if (!req.user) {
+      console.error("OAuth failed, no user object received.");
+      res.status(401).json({ error: "OAuth failed" });
+      return ;
+    }
+    const user = req.user as { _id: string;};
+    const token = generateToken(user);
+   // res.redirect(`${data.frontend_url}?token=${token}`);
+   return res.redirect(`${data.frontend_url}?token=${token}`);
+  }
+);
 
 interface AuthRequest extends Request{
     userId?:string | JwtPayload
@@ -256,10 +292,17 @@ app.post("/api/v1/content",userMiddleware, async (req:AuthRequest,res:Response):
 
 
 app.get("/api/v1/content",userMiddleware,async (req:AuthRequest,res:Response):Promise<any>=>{
+  console.log("Entered Content API");
     const userId=req.userId;
     const content=await Content.find({
         userId:userId
     })
+    if(!content){
+      console.log("No Content Found");
+        res.status(411).json({
+            message:"No Content Found"
+        })
+    }
     res.json({
         content
     })
@@ -354,6 +397,7 @@ app.get("/api/v1/upload", userMiddleware, async (req: AuthRequest, res: Response
         const uploads = await Upload.find({ userId });
 
         if (!uploads || uploads.length === 0) {
+          console.log("No uploads found");
             return res.status(404).json({ message: "No uploads found" });
         }
 

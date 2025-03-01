@@ -12,9 +12,11 @@ export const  userMiddleware=async(req:AuthRequest,res:Response,next:NextFunctio
             res.status(401).send("Invalid Tokens");
             return;
         }
+        console.log(token);
         const decoded=Jwt.verify(token,data.JwtPassword as string ) as JwtPayload
         console.log(decoded);
         req.userId =decoded.id
+        console.log("Yaha to sab changa si !",req.userId);
         next();
 
     }

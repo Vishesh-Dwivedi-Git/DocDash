@@ -24,7 +24,7 @@ export default function Sign() {
       localStorage.setItem("token", token);
       login(token);
       toast.success("✅ Login successful!");
-      navigate("/dashboard");
+      setTimeout(() => navigate("/dashboard"), 2000);
     }
   }, [navigate, login]);
 
@@ -57,7 +57,7 @@ export default function Sign() {
   };
 
   return (
-    <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">  
+    <GoogleOAuthProvider clientId="833418603486-s5mj8a0omfcn47ov6ke2tbu6pu7gpb81.apps.googleusercontent.com">  
       <div className="h-screen bg-black text-white flex flex-col justify-center items-center space-y-8">
         <ToastContainer position="top-right" theme="dark" closeOnClick />
 
