@@ -110,7 +110,7 @@ const Dashboard = () => {
         <div className="flex flex-wrap justify-start gap-4 mt-4">
           {filteredItems.map((item, index) => (
             <div key={index} className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4">
-              <SocialMediaCard type={item.type} link={item.link} title={item.title} />
+              <SocialMediaCard type={item.type} link={item.link} title={item.title} itemId={item._id}/>
             </div>
           ))}
         </div>

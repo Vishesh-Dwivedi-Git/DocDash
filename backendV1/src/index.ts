@@ -21,6 +21,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import { Strategy as DiscordStrategy } from "passport-discord";
+import { configDotenv } from "dotenv";
 
 
 
@@ -253,7 +254,6 @@ app.get(
 interface AuthRequest extends Request{
     userId?:string | JwtPayload
 }
-
 app.post("/api/v1/content",userMiddleware, async (req:AuthRequest,res:Response):Promise<any>=>{
     const {link , type , title}=req.body;
     console.log("hi");
@@ -296,13 +296,16 @@ app.get("/api/v1/content",userMiddleware,async (req:AuthRequest,res:Response):Pr
     const userId=req.userId;
     const content=await Content.find({
         userId:userId
-    })
+    });
+    console.log(content);
+
     if(!content){
       console.log("No Content Found");
         res.status(411).json({
             message:"No Content Found"
         })
     }
+
     res.json({
         content
     })
@@ -395,6 +398,7 @@ app.get("/api/v1/upload", userMiddleware, async (req: AuthRequest, res: Response
     try {
         console.log("Fetching uploads for user:", userId);
         const uploads = await Upload.find({ userId });
+        console.log("Uploads found:", uploads);
 
         if (!uploads || uploads.length === 0) {
           console.log("No uploads found");
@@ -459,6 +463,39 @@ app.post("/search", async (req: Request, res: Response):Promise<any> => {
 //       res.status(500).json({ error: "Internal Server Error" });
 //     }
 // });
+app.delete("/api/social-media/:id", userMiddleware, async (req: AuthRequest, res: Response): Promise<any> => {
+  console.log("Entered Delete API");
+  console.log("User ID:", req.userId);
+  console.log(req.params);
+  const id = req.params.id;
+  console.log("ID to delete:", id);
+
+  try {
+    // Validate ID format (assuming MongoDB ObjectId)
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+
+    // Attempt to delete the document
+    console.log("Deleting content with ID:", id);
+    const result = await Content.deleteOne({
+      _id: id,
+      userId: req.userId,
+    });
+   console.log(result);
+    // Check if a document was deleted
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Content not found or not authorized" });
+    }
+
+    // Success response
+    console.log("Deleted successfully");
+    res.status(200).json({ message: "Deleted" });
+  } catch (error) {
+    console.error("Error in delete API:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 app.get("/api/v1/:shareLink",async (req:Request,res:Response):Promise<any>=>{
     const hash=req.params.shareLink;

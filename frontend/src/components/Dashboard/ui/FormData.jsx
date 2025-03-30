@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
-import useStore from "../../../store";
-import { useUploadStore } from "../../../store";
+import useStore ,{useUploadStore} from "../../../store";
 import { motion } from "framer-motion";
+
+// Define allowed content types
+const contentTypes = ["youtube", "twitter", "instagram", "linkedin"];
 
 const AestheticForm = () => {
   const [loading, setLoading] = useState(false);
@@ -11,7 +13,7 @@ const AestheticForm = () => {
   const [formData, setFormData] = useState({
     link: "",
     type: "",
-    title: ""
+    title: "",
   });
 
   const handleChange = (e) => {
@@ -66,7 +68,9 @@ const AestheticForm = () => {
 
       {/* Title Input */}
       <div className="mb-4">
-        <label htmlFor="title" className="block text-white text-sm font-medium mb-2">Title</label>
+        <label htmlFor="title" className="block text-white text-sm font-medium mb-2">
+          Title
+        </label>
         <input
           type="text"
           id="title"
@@ -78,23 +82,35 @@ const AestheticForm = () => {
         />
       </div>
 
-      {/* Type Input */}
+      {/* Type Dropdown */}
       <div className="mb-4">
-        <label htmlFor="type" className="block text-white text-sm font-medium mb-2">Type</label>
-        <input
-          type="text"
+        <label htmlFor="type" className="block text-white text-sm font-medium mb-2">
+          Type
+        </label>
+        <select
           id="type"
           name="type"
           value={formData.type}
           onChange={handleChange}
           required
           className="w-full p-3 bg-purple-900 bg-opacity-60 rounded-lg border border-purple-600 text-white outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
-        />
+        >
+          <option value="" className="bg-purple-900">
+            Select Type
+          </option>
+          {contentTypes.map((type) => (
+            <option key={type} value={type} className="bg-purple-900">
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Link Input */}
       <div className="mb-6">
-        <label htmlFor="link" className="block text-white text-sm font-medium mb-2">Link</label>
+        <label htmlFor="link" className="block text-white text-sm font-medium mb-2">
+          Link
+        </label>
         <input
           type="text"
           id="link"
@@ -128,6 +144,7 @@ const AestheticForm = () => {
 
 export default AestheticForm;
 
+// The UploadForm remains unchanged as per your request
 export const UploadForm = () => {
   const [loading, setLoading] = useState(false);
   const { addUpload } = useUploadStore();
