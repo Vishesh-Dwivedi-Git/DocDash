@@ -6,8 +6,6 @@ import { useShareStore } from "../../../../Store"; // Import Zustand store
 const ShareBox = () => {
   const { showShareBox, shareLink, copied, setShowShareBox, setShareLink, setCopied } = useShareStore();
 
-  console.log("🔄 ShareBox Component Rendered - showShareBox:", showShareBox);
-
   useEffect(() => {
     if (showShareBox) {
       fetch("http://localhost:3000/api/v1/share", {
@@ -16,46 +14,44 @@ const ShareBox = () => {
           "Content-Type": "application/json",
           "x-auth-token": localStorage.getItem("token")
         },
-        body: JSON.stringify({ share: true }), // Request backend to create link
+        body: JSON.stringify({ share: true }),
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("✅ API Response:", data.hash);
-          // Append localhost:3000 in front of the hash
           setShareLink(`http://localhost:5173/share/${data.hash}`);
         })
-        .catch((err) => console.error("❌ Error fetching share link:", err));
+        .catch((err) => console.error("Error fetching share link:", err));
     }
   }, [showShareBox, setShareLink]);
 
   const handleClose = () => {
     setShowShareBox(false);
-    setShareLink(""); // Clear link in UI
+    setShareLink("");
   };
 
-  if (!showShareBox) return null; // Prevent unnecessary rendering
+  if (!showShareBox) return null;
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 backdrop-blur-lg z-50">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.2 }}
-        className="bg-gray-800 p-4 rounded-lg shadow-lg w-96"
+        className="bg-purple-950 bg-opacity-80 p-6 rounded-xl shadow-2xl w-96 border border-purple-500"
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-white text-lg font-semibold">Share Dashboard</h2>
-          <button onClick={handleClose}>
-            <X className="text-white hover:text-gray-400" size={20} />
+          <h2 className="text-white text-lg font-semibold font-grotesk">Share Dashboard</h2>
+          <button onClick={handleClose} className="text-white hover:text-gray-300">
+            <X size={24} />
           </button>
         </div>
-        <div className="flex items-center bg-gray-700 p-2 rounded-lg">
+        <div className="flex items-center bg-purple-900 bg-opacity-60 p-3 rounded-lg border border-purple-600">
           <input
             type="text"
             value={shareLink}
             readOnly
-            className="bg-transparent text-white w-full outline-none"
+            className="bg-transparent text-white w-full outline-none font-code"
           />
           <button
             onClick={() => {
@@ -63,11 +59,12 @@ const ShareBox = () => {
               setCopied(true);
               setTimeout(() => setCopied(false), 2000);
             }}
+            className="ml-2 text-white hover:text-gray-300"
           >
-            <Copy className="text-white hover:text-gray-400" size={20} />
+            <Copy size={22} />
           </button>
         </div>
-        {copied && <p className="text-green-400 text-sm mt-2">Link copied!</p>}
+        {copied && <p className="text-green- text-white sm mt-2 font-grotesk">Link copied!</p>}
       </motion.div>
     </div>
   );

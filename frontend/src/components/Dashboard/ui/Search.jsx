@@ -1,7 +1,8 @@
 import { useCallback } from "react";
-import { debounce } from "lodash"; // Install lodash with: npm install lodash
+import { debounce } from "lodash";
 import useStore, { useUploadStore } from "../../../store";
-import { X, Search } from "lucide-react"; // Install lucide icons with: npm install lucide-react
+import { X, Search } from "lucide-react";
+import { motion } from "framer-motion";
 
 const SearchBar = ({ isOpen, onClose }) => {
   const setSearchQuery = useStore((state) => state.setSearchQuery);
@@ -12,7 +13,7 @@ const SearchBar = ({ isOpen, onClose }) => {
     debounce((value) => {
       setSearchQuery(value);
       setUploadSearchQuery(value);
-    }, 300), // Waits 300ms before updating state
+    }, 300),
     []
   );
 
@@ -20,36 +21,40 @@ const SearchBar = ({ isOpen, onClose }) => {
     debouncedSearch(e.target.value);
   };
 
+  if (!isOpen) return null;
+
   return (
-    <>
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 transition-all">
-          <div className="bg-gradient-to-br from-purple-700 to-purple-900 p-6 rounded-2xl shadow-2xl w-96 max-w-full relative border border-purple-400/50">
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="absolute top-3 right-3 text-white opacity-70 hover:opacity-100 transition"
-            >
-              <X size={24} />
-            </button>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 transition-all">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.2 }}
+        className="bg-purple-950 bg-opacity-70 p-6 rounded-xl shadow-2xl w-96 max-w-full relative border border-purple-500"
+      >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-white opacity-70 hover:opacity-100 transition-all duration-200"
+        >
+          <X size={24} />
+        </button>
 
-            <h2 className="text-white text-xl font-semibold mb-4 text-center">🔍 Search</h2>
+        <h2 className="text-white text-lg font-semibold font-grotesk mb-4 text-center">🔍 Search</h2>
 
-            {/* Search Input */}
-            <div className="flex items-center bg-purple-800/40 px-4 py-2 rounded-full shadow-md backdrop-blur-md border border-purple-500/40">
-              <Search size={20} className="text-purple-300" />
-              <input
-                type="text"
-                className="w-full bg-transparent outline-none text-white text-lg px-3 placeholder-gray-300"
-                placeholder="Type to search..."
-                onChange={handleSearch}
-                autoFocus
-              />
-            </div>
-          </div>
+        {/* Search Input */}
+        <div className="flex items-center bg-purple-900 bg-opacity-70 px-4 py-3 rounded-lg border border-purple-600 shadow-md">
+          <Search size={20} className="text-white mr-2" />
+          <input
+            type="text"
+            className="w-full bg-transparent outline-none text-white text-lg placeholder-purple-300 font-code"
+            placeholder="Type to search..."
+            onChange={handleSearch}
+            autoFocus
+          />
         </div>
-      )}
-    </>
+      </motion.div>
+    </div>
   );
 };
 

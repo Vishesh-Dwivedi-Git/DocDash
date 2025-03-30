@@ -1,1 +1,1 @@
-{"root":["./src/cloudinary.ts","./src/config.ts","./src/db.ts","./src/index.ts","./src/usermiddleware.ts","./src/utils.ts","./src/rag/generateresp.ts","./src/rag/searchdatabase.ts"],"version":"5.7.3"}
+{"root":["./src/cloudinary.ts","./src/config.ts","./src/db.ts","./src/index.ts","./src/userMiddleware.ts","./src/utils.ts","./src/RAG/generateResp.ts","./src/RAG/searchDatabase.ts"],"version":"5.7.3"}

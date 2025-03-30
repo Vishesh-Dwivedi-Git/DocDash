@@ -10,7 +10,7 @@ import {
 } from "@tabler/icons-react";
 import Button from "../design/Button";
 import ExpandableCard from "./ui/ExpandableCard";
-import AestheticForm, { UploadForm } from "./ui/FormData";
+  import AestheticForm, {UploadForm } from "./ui/FormData";
 import UsernameInput from "./ui/Username";
 import useStore from "../../store";
 import SocialMediaCard from "./ui/SocialMediaCard";
@@ -80,14 +80,6 @@ const Dashboard = () => {
   return (
     <div className="flex-1 p-4 md:p-6 bg-black dark:bg-neutral-900 relative overflow-auto ">
       <div className="flex justify-around items-center mb-4 relative z-10 overflow-hidden">
-        <Button
-          onClick={() => setActiveUser(true)}
-          className="text-xs md:text-sm px-4 py-2 text-white rounded-lg shadow-md transition-all"
-        >
-          <div className="flex items-center gap-2">
-            <IconUserPlus className="h-4 w-4" /> Add User
-          </div>
-        </Button>
         <ExpandableCard isActive={isActiveUser} onClose={() => setActiveUser(false)} content={<UsernameInput />} />
         <Button
           onClick={() => setIsCardActive(true)}
