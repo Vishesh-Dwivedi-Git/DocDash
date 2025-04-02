@@ -3,7 +3,7 @@ import { Link } from 'react-scroll';
 import Button from '../design/Button';
 import '../../index.css';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../store';
+import { useAuthStore } from '../../Store';
 
 const navigation = [
   { name: 'Home', href: 'Home' },

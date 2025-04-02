@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { debounce } from "lodash";
-import useStore, { useUploadStore } from "../../../store";
+import useStore, { useUploadStore } from "../../../Store";
 import { X, Search } from "lucide-react";
 import { motion } from "framer-motion";
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuthStore } from "./store"; // Import Zustand store
+import { useAuthStore } from "./Store"; // Import Zustand store
 
 const ProtectedRoute = ({ element }) => {
   const login = useAuthStore((state) => state.login);

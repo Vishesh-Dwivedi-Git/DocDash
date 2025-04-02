@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import useStore ,{useUploadStore} from "../../../store";
+import useStore ,{useUploadStore} from "../../../Store";
 import { motion } from "framer-motion";
 
 // Define allowed content types
