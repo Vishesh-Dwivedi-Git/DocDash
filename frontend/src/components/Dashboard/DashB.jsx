@@ -18,7 +18,7 @@ import { useUploadStore } from "../../store";
 import CardPreview from "./ui/CardPreview";
 import SearchBar from "./ui/Search";
 
-export function SidebarDemo() {
+export default function SidebarDemo() {
   const links = [
     { label: "Dashboard", href: "/dashboard", icon: <IconBrandTabler className="text-purple-500 h-5 w-5" /> },
     { label: "Profile", href: "/profile", icon: <IconUserBolt className="text-purple-500 h-5 w-5" /> },
