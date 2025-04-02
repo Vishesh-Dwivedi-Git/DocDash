@@ -8,7 +8,7 @@ const ShareBox = () => {
 
   useEffect(() => {
     if (showShareBox) {
-      fetch("http://localhost:3000/api/v1/share", {
+      fetch("https://docdash-production.up.railway.app/api/v1/share", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

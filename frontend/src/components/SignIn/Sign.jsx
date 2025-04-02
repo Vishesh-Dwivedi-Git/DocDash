@@ -14,7 +14,7 @@ export default function Sign() {
   const [emailError, setEmailError] = useState("");
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-  const backendURL = "http://localhost:3000/api/v1";
+  const backendURL = "https://docdash-production.up.railway.app/api/v1";
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);

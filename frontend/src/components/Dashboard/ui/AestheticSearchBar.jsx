@@ -28,7 +28,7 @@ const AestheticSearchBar = ({ onSelect }) => {
     setAiResponse(""); // Reset previous response
 
     try {
-      const response = await fetch("http://localhost:3000/search", {
+      const response = await fetch("https://docdash-production.up.railway.app/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query }),
