@@ -12,9 +12,9 @@ import Button from "../design/Button";
 import ExpandableCard from "./ui/ExpandableCard";
   import AestheticForm, {UploadForm } from "./ui/FormData";
 import UsernameInput from "./ui/Username";
-import useStore from "../../store";
+import useStore from "../../Store";
 import SocialMediaCard from "./ui/SocialMediaCard";
-import { useUploadStore } from "../../store";
+import { useUploadStore } from "../../Store";
 import CardPreview from "./ui/CardPreview";
 import SearchBar from "./ui/Search";
 
