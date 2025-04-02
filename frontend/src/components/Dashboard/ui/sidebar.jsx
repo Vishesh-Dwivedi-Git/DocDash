@@ -4,7 +4,7 @@ import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { IconChevronRight, IconChevronLeft } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
-import { useSidebarStore ,useShareStore } from "../../..Store"; // Import Zustand store
+import { useSidebarStore ,useShareStore } from "../../../Store"; // Import Zustand store
 import Logout from "../../SignIn/Logout";
 
 
