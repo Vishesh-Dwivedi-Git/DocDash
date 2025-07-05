@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { Sidebar, SidebarLink } from "./sidebar";
 import { IconArrowAutofitLeftFilled, IconBrandTabler, IconUserBolt, IconShare } from "@tabler/icons-react";
@@ -46,7 +46,7 @@ const ProfileLayout = () => {
   const links = [
     { label: "Dashboard", href: "/dashboard", icon: <IconBrandTabler className="text-purple-500 h-5 w-5" /> },
     { label: "Profile", href: "/profile", icon: <IconUserBolt className="text-purple-500 h-5 w-5" /> },
-    { label: "Share", href: "/share", icon: <IconShare className="text-purple-500 h-5 w-5" /> },
+    { label: "Share", href: "share", icon: <IconShare className="text-purple-500 h-5 w-5" /> },
     { label: "Logout", href: "/logout", icon: <IconArrowAutofitLeftFilled className="text-purple-500 h-5 w-5" /> },
   ];
 

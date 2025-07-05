@@ -18,7 +18,7 @@ const ShareBox = () => {
       })
         .then((res) => res.json())
         .then((data) => {
-          setShareLink(`http://localhost:5173/share/${data.hash}`);
+          setShareLink(`https://docdash-production.up.railway.app/${data.hash}`);
         })
         .catch((err) => console.error("Error fetching share link:", err));
     }

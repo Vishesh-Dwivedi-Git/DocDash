@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import axios from "axios";
-import { get } from "react-scroll/modules/mixins/scroller";
 
 const useStore = create((set,get) => ({
   items: [],  // Default empty array for items

@@ -4,7 +4,6 @@ import {
   IconArrowAutofitLeftFilled,
   IconBrandTabler,
   IconUserBolt,
-  IconUserPlus,
   IconSearch,
   IconShare,
 } from "@tabler/icons-react";
