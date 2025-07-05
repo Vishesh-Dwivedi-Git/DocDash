@@ -11,7 +11,7 @@ const useStore = create((set,get) => ({
       const token = localStorage.getItem("token");
 
       // Request with token (ensure the token exists)
-      const response = await axios.get("https://docdash-production.up.railway.app/api/v1/content", {
+      const response = await axios.get("https://docdash-production.up.railway.app/api/v1/content", { 
         headers: {
           "Content-Type": "application/json",
           "x-auth-token": token || "",
