@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuthStore } from "../../Store";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { FaGithub, FaDiscord } from "react-icons/fa";
 
 export default function Sign() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -28,10 +27,7 @@ export default function Sign() {
     }
   }, [navigate, login]);
 
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -51,13 +47,28 @@ export default function Sign() {
       login(token);
       toast.success(isSignUp ? "🎉 Account created successfully!" : "✨ Logged in successfully!");
       setTimeout(() => navigate("/dashboard"), 2000);
-    } catch (error) {
+    } catch {
       toast.error("⚠️ Authentication failed! Check your credentials.");
     }
   };
 
+  const handleGoogleLogin = async (response) => {
+    try {
+      const result = await axios.post(`${backendURL}/oauth/google`, {
+        token: response.credential,
+      });
+      const jwt = result.data.token;
+      localStorage.setItem("token", jwt);
+      login(jwt);
+      toast.success("✅ Google login successful!");
+      setTimeout(() => navigate("/dashboard"), 2000);
+    } catch {
+      toast.error("❌ Google Login Failed");
+    }
+  };
+
   return (
-    <GoogleOAuthProvider clientId="833418603486-s5mj8a0omfcn47ov6ke2tbu6pu7gpb81.apps.googleusercontent.com">  
+    <GoogleOAuthProvider clientId="988468966535-tqu1dfrti3vkkcl8tr2hhqjitc2ddaav.apps.googleusercontent.com">
       <div className="h-screen bg-black text-white flex flex-col justify-center items-center space-y-8">
         <ToastContainer position="top-right" theme="dark" closeOnClick />
 
@@ -91,26 +102,12 @@ export default function Sign() {
           </button>
         </form>
 
-        <div className="flex space-x-4">
+        <div className="flex flex-col items-center">
           <GoogleLogin
-            onSuccess={(response) => window.location.href = `${backendURL}/oauth/google?token=${response.credential}`}
+            onSuccess={handleGoogleLogin}
             onError={() => toast.error("❌ Google Login Failed!")}
             useOneTap
           />
-
-          <button
-            onClick={() => window.location.href = `${backendURL}/oauth/github`}
-            className="w-14 h-14 flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white rounded-full shadow-lg transform hover:scale-110"
-          >
-            <FaGithub size={24} />
-          </button>
-
-          <button
-            onClick={() => window.location.href = `${backendURL}/oauth/discord`}
-            className="w-14 h-14 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transform hover:scale-110"
-          >
-            <FaDiscord size={24} />
-          </button>
         </div>
 
         <button

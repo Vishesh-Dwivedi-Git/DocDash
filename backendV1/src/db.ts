@@ -21,7 +21,7 @@ const contentSchemas= new Schema({
     title:{type:String , required:true},
     tags:[{type:Types.ObjectId , ref:'Tag'}],
     userId:{type:Types.ObjectId,ref:'User',required:true},
-    embedding: { type: [Number], default: [] }, 
+    // embedding: { type: [Number], default: [] }, 
 
 });
 export const Content=mongoose.model("Content",contentSchemas);
@@ -39,7 +39,7 @@ const UploadSchema = new mongoose.Schema({
   file: String,
   fileType: String,
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  embedding: { type: [Number], default: [] }, 
+//   embedding: { type: [Number], default: [] }, 
 });
 
   export const Upload = mongoose.model("Upload", UploadSchema);

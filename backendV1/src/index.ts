@@ -1,255 +1,156 @@
+
 import express, { Request, Response } from "express";
-import { Content, Link, User,Upload } from "./db";
-import bcrypt from "bcrypt"
+import { Content, Link, User, Upload } from "./db";
+import bcrypt from "bcrypt";
 import Jwt, { JwtPayload } from "jsonwebtoken";
 import { data } from "./config";
 import { userMiddleware } from "./userMiddleware";
 import { random } from "./utils";
 import mongoose from "mongoose";
-import cors from "cors"
-import multer from "multer"
-import bodyParser from "body-parser"
-import { HfInference } from "@huggingface/inference";
+import cors from "cors";
+import multer from "multer";
+import bodyParser from "body-parser";
+import { uploadToCloudinary } from "./cloudinary";
+// import { generateAIResponse } from "./RAG/generateResp";
+// import  searchDatabase  from "./RAG/searchDatabase";
+// const hfApiKey =data.api_huggingFace;
+// const embeddingModel = "sentence-transformers/all-MiniLM-L6-v2"; // Choose appropriate model
+// const hf = new HfInference(hfApiKey);
 
-import { uploadToCloudinary } from "./cloudinary";                  // Cloudinary upload function
-import { generateAIResponse } from "./RAG/generateResp";
-import  searchDatabase  from "./RAG/searchDatabase";
-const hfApiKey =data.api_huggingFace;
-const embeddingModel = "sentence-transformers/all-MiniLM-L6-v2"; // Choose appropriate model
-const hf = new HfInference(hfApiKey);
-import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Strategy as GitHubStrategy } from "passport-github2";
-import { Strategy as DiscordStrategy } from "passport-discord";
-import { configDotenv } from "dotenv";
+// import passport from "passport";
+// import { Strategy as GitHubStrategy } from "passport-github2";
+// import { Strategy as DiscordStrategy } from "passport-discord";
+import { OAuth2Client } from "google-auth-library";
 
+const client = new OAuth2Client(data.google_client_id);
+const app = express();
 
-
-
-
-
-// Storing files in memory temporarily
-const storage = multer.diskStorage({
-    filename: (req, file, cb) => {
-      cb(null, `${Date.now()}-${file.originalname}`);
-    },
-  });
-  const upload = multer({ storage: storage }).single("file");
-  
-
-const app=express();
-app.use(express.json());
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: true })); // Parse form data
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect(data.MongoURL as string)
   .then(() => console.log('Connected to MongoDB'))
   .catch((error) => console.error('Error connecting to MongoDB:', error));
 
-
-app.post("/api/v1/signup", async (req:Request,res:Response)=>{
-    const {username,password}=req.body;
-    try {
-        const hashedPassword=await bcrypt.hash(password,10);
-       await User.create({
-        username:username,
-        password:hashedPassword
-       })
-       res.status(201).send({
-        message:"User Sign Up SuccessFully"
-       })
-    }
-    catch(e){
-        res.status(411).send({
-            message:"There was an error"
-        })
-    }
-});
-
-app.post("/api/v1/signIn",async (req:Request,res:Response ):Promise<any> =>{
-    const {username ,password} =req.body;
-    console.log("Signin");
-    try{
-        const user=await User.findOne({
-            username:username,
-        });
-        if (!user) return res.status(400).json({ message: 'Invalid email or password' });
-        const hashPas=await bcrypt.compare(password,user.password as string);
-        if(!hashPas) return res.status(400).json({message:"Invalid email or password"});
-        const token=Jwt.sign({
-            id:user._id
-        },data.JwtPassword as string);
-
-        res.json({
-            message:"User logined",
-            token,
-        })
-    }
-    catch(e){
-        res.status(401).send({
-            message:"Error Occured!"
-        })
-    }
-   
-
-})
-
-
-
-// 🔹 Generate JWT Token
 const generateToken = (user: { _id: string }): string => {
-  return Jwt.sign(
-    { id: user._id, }, // Include userId
-    data.JwtPassword as string,
-    { expiresIn: "7d" }
-  );
+  return Jwt.sign({ id: user._id }, data.JwtPassword as string, { expiresIn: "7d" });
 };
 
-  
-  // 🔹 Google OAuth
- // 🔹 Google OAuth
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: data.google_client_id as string,
-      clientSecret: data.google_client_secret as string,
-      callbackURL: "/api/v1/oauth/google/callback",
-      state: false, // Ensures better security (anti-CSRF)
-    },
-    async (_accessToken, _refreshToken, profile, done) => {
-      try {
-        const username = profile.emails?.[0]?.value;
-        if (!username) return done(new Error("Email not found"), undefined);
+const storage = multer.diskStorage({
+  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
+});
+const upload = multer({ storage }).single("file");
 
-        const user = await User.findOneAndUpdate(
-          { username },
-          { $set: { username } }, // Ensure email is set
-          { upsert: true, new: true }
-        );
+// 🔹 Email/Password Signup
+app.post("/api/v1/signup", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await User.create({ username, password: hashedPassword });
+    res.status(201).json({ message: "User Sign Up SuccessFully" });
+  } catch {
+    res.status(411).json({ message: "There was an error" });
+  }
+});
 
-        return done(null, user);
-      } catch (error) {
-        console.error("hI ricky Google OAuth Error:", error);
-        return done(error);
-      }
-    }
-  )
-);
-
-// 🔹 GitHub OAuth
-passport.use(
-  new GitHubStrategy(
-    {
-      clientID: data.github_client_id as string,
-      clientSecret: data.github_client_secret as string,
-      callbackURL: "/api/v1/oauth/github/callback",
-      scope: ["user:email"],
-    },
-    async (_accessToken: any, _refreshToken: any, profile: { emails: { value: string; }[]; username: any; }, done: (arg0: unknown, arg1: (mongoose.Document<unknown, {}, { username?: string | null | undefined; password?: string | null | undefined; }> & { username?: string | null | undefined; password?: string | null | undefined; } & { _id: mongoose.Types.ObjectId; } & { __v: number; }) | undefined) => any) => {
-      try {
-        let email = profile.emails?.[0]?.value || `${profile.username}@github.com`;
-        if (!email) return done(new Error("Email not found"), undefined);
-
-        const user = await User.findOneAndUpdate(
-          { email },
-          { $set: { email } },
-          { upsert: true, new: true }
-        );
-
-        return done(null, user);
-      } catch (error) {
-        console.error("GitHub OAuth Error:", error);
-        return done(error,undefined);
-      }
-    }
-  )
-);
-
-// 🔹 Discord OAuth
-passport.use(
-  new DiscordStrategy(
-    {
-      clientID: data.discord_client_id as string,
-      clientSecret: data.discord_client_secret as string,
-      callbackURL: "/api/v1/oauth/discord/callback",
-      scope: ["identify", "email"],
-    },
-    async (_accessToken, _refreshToken, profile, done) => {
-      try {
-        let email = profile.email || `${profile.username}@discord.com`;
-        if (!email) return done(new Error("Email not found"), undefined);
-
-        const user = await User.findOneAndUpdate(
-          { email },
-          { $set: { email } },
-          { upsert: true, new: true }
-        );
-
-        return done(null, user);
-      } catch (error) {
-        console.error("Discord OAuth Error:", error);
-        return done(error);
-      }
-    }
-  )
-);
-
-// 🔹 API Routes
-app.get("/api/v1/oauth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
-
-app.get(
-  "/api/v1/oauth/google/callback",
-  passport.authenticate("google", { session: false }),
-  (req: Request, res: Response): void => {
-    if (!req.user) {
-      console.error("OAuth failed, no user object received.");
-      res.status(401).json({ error: "OAuth failed" });
+// 🔹 Email/Password Login
+app.post("/api/v1/signIn", async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+  try {
+    const user = await User.findOne({ username });
+    if (!user || !(await bcrypt.compare(password, user.password as string))) {
+      res.status(400).json({ message: "Invalid email or password" });
       return;
     }
-
-    const user = req.user as { _id: string;};
-    const token = generateToken(user);
-    console.log("Generated Token:", token);
-
-    return res.redirect(`${data.frontend_url}?token=${token}`);
+    const token = generateToken({ _id: user._id.toString() });
+    res.json({ message: "User logined", token });
+  } catch {
+    res.status(401).json({ message: "Error Occurred!" });
   }
-);
+});
 
-app.get("/api/v1/oauth/github", passport.authenticate("github"));
+// ✅ 🔹 Google One Tap / Popup Login Handler
+app.post("/api/v1/oauth/google", (req, res) => {
+  const { token } = req.body;
+  (async () => {
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: data.google_client_id,
+      });
+      const payload = ticket.getPayload();
+      const email = payload?.email;
 
-app.get(
-  "/api/v1/oauth/github/callback",
-  passport.authenticate("github", { session: false }),
-  (req: Request, res: Response): void => {
-    if (!req.user) {
-      console.error("OAuth failed, no user object received.");
-      res.status(401).json({ error: "OAuth failed" });
-      return ;
+      if (!email) return res.status(400).json({ error: "Email not found in token" });
+
+      const user = await User.findOneAndUpdate(
+        { username: email },
+        { $set: { username: email } },
+        { upsert: true, new: true }
+      );
+      const jwt = generateToken({ _id: user._id.toString() });
+      res.json({ token: jwt });
+    } catch (err) {
+      res.status(401).json({ error: "Invalid Google token" });
     }
-    const user = req.user as { _id: string;};
-    const token = generateToken(user);
-   // res.redirect(`${data.frontend_url}?token=${token}`);
-   return res.redirect(`${data.frontend_url}?token=${token}`);
-  }
-);
+  })();
+});
 
-app.get("/api/v1/oauth/discord", passport.authenticate("discord"));
+// 🔹 GitHub OAuth
+// passport.use(new GitHubStrategy({
+//   clientID: data.github_client_id,
+//   clientSecret: data.github_client_secret,
+//   callbackURL: "/api/v1/oauth/github/callback",
+//   scope: ["user:email"],
+// }, async (_accessToken, _refreshToken, profile, done) => {
+//   try {
+//     const email = profile.emails?.[0]?.value || `${profile.username}@github.com`;
+//     const user = await User.findOneAndUpdate(
+//       { username: email },
+//       { $set: { username: email } },
+//       { upsert: true, new: true }
+//     );
+//     return done(null, user);
+//   } catch (e) {
+//     return done(e);
+//   }
+// }));
 
-app.get(
-  "/api/v1/oauth/discord/callback",
-  passport.authenticate("discord", { session: false }),
-  (req: Request, res: Response):void => {
-    if (!req.user) {
-      console.error("OAuth failed, no user object received.");
-      res.status(401).json({ error: "OAuth failed" });
-      return ;
-    }
-    const user = req.user as { _id: string;};
-    const token = generateToken(user);
-   // res.redirect(`${data.frontend_url}?token=${token}`);
-   return res.redirect(`${data.frontend_url}?token=${token}`);
-  }
-);
+// // 🔹 Discord OAuth
+// passport.use(new DiscordStrategy({
+//   clientID: data.discord_client_id,
+//   clientSecret: data.discord_client_secret,
+//   callbackURL: "/api/v1/oauth/discord/callback",
+//   scope: ["identify", "email"],
+// }, async (_accessToken, _refreshToken, profile, done) => {
+//   try {
+//     const email = profile.email || `${profile.username}@discord.com`;
+//     const user = await User.findOneAndUpdate(
+//       { username: email },
+//       { $set: { username: email } },
+//       { upsert: true, new: true }
+//     );
+//     return done(null, user);
+//   } catch (e) {
+//     return done(e);
+//   }
+// }));
+
+// // 🔹 GitHub + Discord Routes
+// app.get("/api/v1/oauth/github", passport.authenticate("github"));
+// app.get("/api/v1/oauth/github/callback", passport.authenticate("github", { session: false }), (req, res) => {
+//   const user = req.user as { _id: string };
+//   const token = generateToken(user);
+//   res.redirect(`${data.frontend_url}?token=${token}`);
+// });
+
+// app.get("/api/v1/oauth/discord", passport.authenticate("discord"));
+// app.get("/api/v1/oauth/discord/callback", passport.authenticate("discord", { session: false }), (req, res) => {
+//   const user = req.user as { _id: string };
+//   const token = generateToken(user);
+//   res.redirect(`${data.frontend_url}?token=${token}`);
+// });
 
 interface AuthRequest extends Request{
     userId?:string | JwtPayload
@@ -260,16 +161,16 @@ app.post("/api/v1/content",userMiddleware, async (req:AuthRequest,res:Response):
     try{
         //create and store the link
         const textForEmbedding = `${title} ${link} ${type}`;
-        const response = await hf.featureExtraction({
-            model: embeddingModel,
-            inputs: textForEmbedding,
-          });
+        // const response = await hf.featureExtraction({
+        //     model: embeddingModel,
+        //     inputs: textForEmbedding,
+        //   });
         const user= await Content.create({
             link:link,
             type:type,
             title:title,
             tags:[],
-            embedding: response,
+            // embedding: response,
             userId:req.userId
         });
         console.log(user)
@@ -380,11 +281,13 @@ app.post("/api/v1/upload", userMiddleware, upload, async (req: AuthRequest, res:
   
       // Save to Database
       const textForEmbedding = `${title} ${fileType} ${description} ${fileUrl}`;
-      const response = await hf.featureExtraction({
-        model: embeddingModel,
-        inputs: textForEmbedding,
+      // const response = await hf.featureExtraction({
+      //   model: embeddingModel,
+      //   inputs: textForEmbedding,
+      // });
+      const newUpload = new Upload({ title, description, file: fileUrl, fileType, userId,
+        // embedding: response 
       });
-      const newUpload = new Upload({ title, description, file: fileUrl, fileType, userId,embedding: response });
       await newUpload.save();
   
       res.status(201).json({ message: "Upload successful", data: newUpload });
@@ -437,19 +340,19 @@ app.get("/api/v1/profile",userMiddleware,async (req:AuthRequest,res:Response):Pr
 
 
 })  
-app.post("/search", async (req: Request, res: Response):Promise<any> => {
-    const { query } = req.body;
-    if (!query) return res.status(400).json({ error: "Query is required" });
+// app.post("/search", async (req: Request, res: Response):Promise<any> => {
+//     const { query } = req.body;
+//     if (!query) return res.status(400).json({ error: "Query is required" });
   
-    console.log(`Received search request: "${query}"`);
-    const searchResults = await searchDatabase(query);
-    let Response = "No relevant answer found.";
-    if(searchResults){
-              Response = await generateAIResponse(searchResults, query);
-    }
+//     console.log(`Received search request: "${query}"`);
+//     // const searchResults = await searchDatabase(query);
+//     // let Response = "No relevant answer found.";
+//     // if(searchResults){
+//     //           Response = await generateAIResponse(searchResults, query);
+//     // }
   
-    res.json({ results: searchResults, Response });
-  });
+//     res.json({ results: searchResults, Response });
+//   });
      
 // app.post("/query", async (req: Request, res: Response):Promise<any> => {
 //     const { query } = req.body;
